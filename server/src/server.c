@@ -17,7 +17,6 @@ int main(int argc,char** argv)
 {
     dbTest();
     int port = atoi(argv[1]);
-    printf("%d\n",port);
     struct sockaddr_in server;
     server.sin_port=htons(port);
     server.sin_family=AF_INET;

@@ -15,7 +15,7 @@ void* resolveClients(void* parameter)
 
 int main(int argc,char** argv)
 {
-    dbTest();
+    //dbTest();
     int port = atoi(argv[1]);
     struct sockaddr_in server;
     server.sin_port=htons(port);

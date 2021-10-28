@@ -11,6 +11,7 @@ int main(int argc,char** argv)
     dbTest();
     int port = atoi(argv[1]);
     struct sockaddr_in server;
+
     server.sin_port=htons(port);
     server.sin_family=AF_INET;
     server.sin_addr.s_addr=inet_addr("127.0.0.1"); 
@@ -20,29 +21,24 @@ int main(int argc,char** argv)
 
     if(g_socket_connect(socket,address,0,0)==0)
     {
-        printf("connect error\n");
+        printf("Connect error\n");
         exit(1);
     }
 
+    //Client 1 decides if he sends or receives info
+    int nr_client = 0;
+    g_socket_send(socket,&nr_client,4,0,0);
 
-    int clientType;
-    g_socket_receive(socket,&clientType,4,0,0);
+    char request[100];
+    //printf("Logged in -> enter command: send or receive\n");
+    //scanf("%s",request);
+    //g_socket_send(socket,request,100,0,0);
 
-    if(clientType == 1)
-    {
-        char request[100];
-        printf("you logged first, enter command: send/receive\n");
-        scanf("%s",request);
-        g_socket_send(socket,request,100,0,0);
-    }
+    //char message[100];
+    g_socket_receive(socket,request,100,0,0);
+    //printf("%s",message);
 
-    g_socket_receive(socket,&clientType,4,0,0);
-
-    char message[100];
-    g_socket_receive(socket,message,100,0,0);
-    printf("%s",message);
-
-    if(clientType == 1)
+    if(strcmp(request,"send")==0)
     {
         printf("enter file name: \n");
         char fileName[100];
@@ -56,7 +52,7 @@ int main(int argc,char** argv)
     {
         char text[1024];
         g_socket_receive(socket,text,1024,0,0);
-        printf("text receive: \n");
+        printf("text received: \n");
         printf("%s\n",text);
     }
     return 0;

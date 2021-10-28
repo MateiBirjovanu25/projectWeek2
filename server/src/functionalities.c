@@ -1,10 +1,17 @@
 #include "functionalities.h"
 void sendRecvText(clientPar* clients)
 {
-    int clientType = 1; //sender
-    g_socket_send(clients->cl1,&clientType,4,0,0);
-    clientType = 2; //receiver
-    g_socket_send(clients->cl2,&clientType,4,0,0);
+    int clientType1,clientType2;
+    g_socket_receive(clients->cl1,&clientType1,4,0,0);
+    g_socket_receive(clients->cl2,&clientType2,4,0,0);
+
+    if(clientType1==2)
+    {
+        GSocket* aux;
+        aux = clients->cl1;
+        clients->cl1 = clients->cl2;
+        clients->cl2 = aux;
+    }
 
     char request[100];
     g_socket_receive(clients->cl1,request,100,0,0);
@@ -24,7 +31,7 @@ void sendRecvText(clientPar* clients)
         return ;
     }
 
-    clientType = 1; //sender
+    int clientType = 1; //sender
     g_socket_send(clients->cl1,&clientType,4,0,0);
     clientType = 2; //receiver
     g_socket_send(clients->cl2,&clientType,4,0,0);

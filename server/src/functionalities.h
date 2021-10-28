@@ -6,3 +6,4 @@ typedef struct
 }clientPar;
 
 void sendRecvText(clientPar* parameter);
+void dbTest();

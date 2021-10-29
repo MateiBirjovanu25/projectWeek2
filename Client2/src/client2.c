@@ -16,22 +16,25 @@
 
 #define PORT 8080
 
-void func(GSocket* sockfd, char msg[100])
+void func(GSocket* sockfd)
 {
+    char msg[100];
+    g_socket_receive(sockfd,msg,100,0,0);
+
     if(strcmp(msg, "send") == 0)
     {
         printf("Fisier text trimis catre server...\n");
         char buffer1[1024];
         FILE *fp = fopen("/home/calinnc/Documents/Exercises/Client1/misc/Mesaj", "r");
         while (fgets(buffer1, sizeof(buffer1), fp)) 
-            g_socket_send(socket, buffer1, 1024, NULL, NULL);
+            g_socket_send(sockfd, buffer1, 1024, NULL, NULL);
         fclose(fp);
     }
     else 
         if(strcmp(msg, "receive") == 0)
         {
         char buffer2[1024];
-        g_socket_receive(socket, buffer2, 1024, NULL, NULL);
+        g_socket_receive(sockfd, buffer2, 1024, NULL, NULL);
         printf("Textul primit: \n");
         printf("%s\n", buffer2); 
         }
@@ -42,7 +45,12 @@ void func(GSocket* sockfd, char msg[100])
 int main(int argc,char** argv)
 {
     struct sockaddr_in serveraddr;
-    
+    int port = atoi(argv[1]);
+
+    serveraddr.sin_port=htons(port);
+    serveraddr.sin_family = AF_INET;
+    serveraddr.sin_addr.s_addr = inet_addr("127.0.0.1");
+
     //creare socket si verificare
     GSocket* socket = g_socket_new(G_SOCKET_FAMILY_IPV4,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP, NULL);
     GSocketAddress* address = g_socket_address_new_from_native(&serveraddr,sizeof(serveraddr));
@@ -52,11 +60,7 @@ int main(int argc,char** argv)
     else
         printf("Socket creat cu succes!\n");
 
-    serveraddr.sin_port=htons(PORT);
-    serveraddr.sin_family = AF_INET;
-    serveraddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-    if(g_socket_connect(socket,address, 0, 0) == NULL)
+    if(g_socket_connect(socket,address, 0, 0) == 0)
     {
         printf("Conectare esuata! \n");
         exit(1);
@@ -66,12 +70,7 @@ int main(int argc,char** argv)
 
     int client = 2;
     g_socket_send(socket, &client, 4, NULL, NULL);
-
-    char msg[100];
-    printf("Introduceti comanda: send / receive. \n");
-    scanf("%s",msg);
-    g_socket_send(socket,msg,100,NULL,NULL);
-    func(&socket, msg);
+    func(socket);
 
     return 0;
 }

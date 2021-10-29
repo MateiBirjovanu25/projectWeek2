@@ -5,5 +5,5 @@ typedef struct
     GSocket* cl2;
 }clientPar;
 
-void sendRecvText(clientPar* parameter);
+void sendRecvText(clientPar*,GSocket*);
 void dbTest();

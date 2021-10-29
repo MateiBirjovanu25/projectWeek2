@@ -20,16 +20,12 @@ int main(int argc,char** argv)
 
     //Client 1 decides if he sends or receives info
     int nr_client = 1;
-    g_socket_send(socket,&nr_client,4,0,0);
+    g_socket_send(socket,(gchar*)&nr_client,4,0,0);
 
     char request[100];
     printf("Logged in -> enter command: send or receive\n");
     scanf("%s",request);
     g_socket_send(socket,request,100,0,0);
-
-    //char message[100];
-    //g_socket_receive(socket,message,100,0,0);
-    //printf("%s",message);
 
     if(strcmp(request,"send")==0)
     {

@@ -1,14 +1,8 @@
 #include "../include.h"
 
-void dbTest()
-{
-    
-}
-
-
 int main(int argc,char** argv)
 {
-    dbTest();
+    //dbTest();
     int port = atoi(argv[1]);
     struct sockaddr_in server;
 
@@ -26,17 +20,12 @@ int main(int argc,char** argv)
     }
 
     //Client 1 decides if he sends or receives info
-    int nr_client = 0;
-    g_socket_send(socket,&nr_client,4,0,0);
+    int nr_client = 2;
+    g_socket_send(socket,(gchar*)&nr_client,4,0,0);
 
     char request[100];
-    //printf("Logged in -> enter command: send or receive\n");
-    //scanf("%s",request);
-    //g_socket_send(socket,request,100,0,0);
-
-    //char message[100];
+    
     g_socket_receive(socket,request,100,0,0);
-    //printf("%s",message);
 
     if(strcmp(request,"send")==0)
     {

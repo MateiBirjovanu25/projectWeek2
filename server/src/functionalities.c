@@ -1,5 +1,5 @@
 #include "functionalities.h"
-void sendRecvText(clientPar* clients,GSocket* secondClient)
+void sendReceiveText(clientPar* clients,GSocket* secondClient)
 {
     char request[100];
     g_socket_receive(clients->cl1,request,100,0,0);

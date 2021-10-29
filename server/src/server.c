@@ -21,7 +21,7 @@ void* resolveClients(void* parameter)
     }
     GSocket* secondClient = clients->cl2;
 
-    sendRecvText(clients,secondClient);
+    sendReceiveText(clients,secondClient);
 
     return NULL;
 }

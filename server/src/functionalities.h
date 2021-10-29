@@ -5,5 +5,10 @@ typedef struct
     GSocket* cl2;
 }clientPar;
 
-void sendRecvText(clientPar*,GSocket*);
+/*
+input: clients:clientPar*, secondClient:GSocket*
+ouput: -
+receives text from one client and sends it to the other 
+*/
+void sendReceiveText(clientPar*,GSocket*);
 void dbTest();

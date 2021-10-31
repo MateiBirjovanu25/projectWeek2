@@ -16,8 +16,11 @@
 
 #define PORT 8080
 
-void func(GSocket* sockfd, char msg[100])
+void func(GSocket* sockfd)
 {
+    char msg[100];
+    g_socket_receive(socket,msg,100,NULL,NULL);
+
     if(strcmp(msg, "send") == 0)
     {
         printf("Fisier text trimis catre server...\n");
@@ -66,12 +69,7 @@ int main(int argc,char** argv)
 
     int client = 2;
     g_socket_send(socket, &client, 4, NULL, NULL);
-
-    char msg[100];
-    printf("Introduceti comanda: send / receive. \n");
-    scanf("%s",msg);
-    g_socket_send(socket,msg,100,NULL,NULL);
-    func(&socket, msg);
+    func(socket);
 
     return 0;
 }

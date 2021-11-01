@@ -7,7 +7,21 @@ void* resolveClients(void* parameter)
 {
     clientPar* clients=(clientPar*)(parameter);
 
-    sendRecvText(clients);
+    int clientType1,clientType2;
+    g_socket_receive(clients->cl1,&clientType1,4,0,0);
+    g_socket_receive(clients->cl2,&clientType2,4,0,0);
+
+    //if client2 connected first, swap
+    if(clientType1==2)
+    {
+        GSocket* aux;
+        aux = clients->cl1;
+        clients->cl1 = clients->cl2;
+        clients->cl2 = aux;
+    }
+    GSocket* secondClient = clients->cl2;
+
+    sendReceiveText(clients,secondClient);
 
     return NULL;
 }
@@ -17,7 +31,6 @@ int main(int argc,char** argv)
 {
     //dbTest();
     int port = atoi(argv[1]);
-    printf("%d\n",port);
     struct sockaddr_in server;
     server.sin_port=htons(port);
     server.sin_family=AF_INET;

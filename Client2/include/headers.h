@@ -1,4 +1,3 @@
-#pragma once
 #include <stdio.h>
 #include <glib.h>
 #include <sys/types.h>
@@ -11,4 +10,3 @@
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <arpa/inet.h>

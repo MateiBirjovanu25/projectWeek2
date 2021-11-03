@@ -2,14 +2,9 @@
 
 //#define PORT 8080
 
-void func(GSocket* sockfd)
+void sendText(GSocket* sockfd)
 {
-    char msg[100];
-    g_socket_receive(sockfd,msg,100,0,0);
-    printf("Urmatoarea actiune: %s\n", msg);
-    if(strcmp(msg, "send") == 0)
-    {
-        printf("Fisier text trimis catre server...\n");
+    printf("Fisier text trimis catre server...\n");
         printf("Introduceti numele fisierului: \n");
         char fileName[100];
         scanf("%s",fileName);
@@ -19,24 +14,19 @@ void func(GSocket* sockfd)
 
         g_socket_send(sockfd,buffer1,1024,0,0);
 
-
         //VARIANTA PENTRU MAI TARZIU.........
         /*FILE *fp = fopen("/home/calinnc/Documents/Exercises/Client2/misc/Mesaj", "r");
         while (fgets(buffer1, sizeof(buffer1), fp)) 
             g_socket_send(sockfd, buffer1, 1024, 0, 0);
         fclose(fp);*/ 
+}
 
-    }
-    else 
-        if(strcmp(msg, "receive") == 0)
-        {
+void receiveText(GSocket* sockfd)
+{
         char buffer2[1024];
         g_socket_receive(sockfd, buffer2, 1024, 0, 0);
         printf("Textul primit: \n");
         printf("%s\n", buffer2); 
-        }
-        else
-            printf("Comanda primita nu este recunoscuta! Try again.\n");
 }
 
 int main(int argc,char** argv)
@@ -68,7 +58,19 @@ int main(int argc,char** argv)
     int client = 2;
     g_socket_send(socket, (gchar*)&client, 4, 0, 0);
 
-    func(socket);
+    char msg[100];
+    g_socket_send(socket,msg,100,0,0);
+    printf("Urmatoarea actiune send/receive: %s\n", msg);
+    if(strcmp(msg, "send") == 0)
+    {
+        sendText(socket);
+    }
+    else{
+        if(strcmp(msg, "receive") == 0)
+            receiveText(socket);
+        else
+            printf("Comanda introdusa nu este cunoscuta!\n");
+    }
 
     return 0;
 }

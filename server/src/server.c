@@ -3,29 +3,21 @@
 input: void* parameter -> struct containing the sockets of the 2 clients
 ouput: NULL
 */
-void* resolveClients(void* parameter)
+
+char text[1024];
+
+void* resolveClient(void* a)
 {
-    clientPar* clients=(clientPar*)(parameter);
-
-    int clientType1,clientType2;
-    g_socket_receive(clients->cl1,&clientType1,4,0,0);
-    g_socket_receive(clients->cl2,&clientType2,4,0,0);
-
-    //if client2 connected first, swap
-    if(clientType1==2)
+    clientPararameter* parameter = (clientPararameter*)a; 
+    if(strcmp(parameter->command,"send") == 0)
     {
-        GSocket* aux;
-        aux = clients->cl1;
-        clients->cl1 = clients->cl2;
-        clients->cl2 = aux;
+        sendText(parameter,text);
     }
-    GSocket* secondClient = clients->cl2;
-
-    sendReceiveText(clients,secondClient);
-
-    return NULL;
+    else if(stcmp(parameter->command,"receive") == 0)
+    {
+        receiveText(parameter,text);
+    }
 }
-
 
 int main(int argc,char** argv)
 {
@@ -53,13 +45,56 @@ int main(int argc,char** argv)
         GSocket* client2 = g_socket_accept(socket,0,0);
         printf("Clients connected\n");
 
-        clientPar* parameter;
-        parameter->cl1=client1;
-        parameter->cl2=client2;
 
-        GThread* t = g_thread_new(NULL,resolveClients,(void*)parameter);
+        int clientType1,clientType2;
+        g_socket_receive(client1,&clientType1,4,0,0);
+        g_socket_receive(client2,&clientType2,4,0,0);
 
-        g_thread_join(t);
+        //if client2 connected first, swap
+        if(clientType1==2)
+        {
+            GSocket* aux;
+            aux = client1;
+            client1 = client2;
+            client2 = aux;
+        }
+
+        
+        char command1[100];
+        char command2[100];
+
+        g_socket_receive(client1,command1,4,0,0);
+        g_socket_receive(client2,command2,4,0,0);
+
+        if(strcmp(command2,command1) == 0)
+        {
+            g_socket_send(client1,"error",10,0,0);
+            g_socket_send(client2,"error",10,0,0);
+            continue;
+        }
+
+        GMutex mtx;
+        g_mutex_init(&mtx);
+        GCond cond;
+        g_cond_init(&cond);
+
+        clientPararameter* cp = malloc(sizeof(clientPararameter));
+        cp -> cl1 = client1;
+        cp -> cl2 = client2;
+        cp -> mtx = &mtx;
+        cp -> cond = &cond;
+        strcpy(cp->command,command1);
+
+        GThread t1;
+        GThread t2;
+        g_thread_new(&t1,resolveClient,cp);
+
+        GSocket* aux;
+            aux = client1;
+            client1 = client2;
+            client2 = aux;
+        strcpy(cp->command,command2);
+        g_thread_new(&t2,resolveClient,cp); 
 
     }
         return 0;

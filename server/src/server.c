@@ -72,6 +72,8 @@ int main(int argc,char** argv)
             g_socket_send(client2,"error",10,0,0);
             continue;
         }
+        g_socket_send(client2,"success",10,0,0);
+        g_socket_send(client1,"success",10,0,0);
 
         GMutex mtx;
         g_mutex_init(&mtx);

@@ -13,7 +13,7 @@ void* resolveClient(void* a)
     {
         sendText(parameter,text);
     }
-    else if(stcmp(parameter->command,"receive") == 0)
+    else if(strcmp(parameter->command,"receive") == 0)
     {
         receiveText(parameter,text);
     }
@@ -97,6 +97,12 @@ int main(int argc,char** argv)
             client2 = aux;
         strcpy(cp->command,command2);
         g_thread_new(&t2,resolveClient,cp); 
+
+        g_thread_join(&t1);
+        g_thread_join(&t2);
+
+        g_mutex_free(&mtx);
+        g_cond_free(&cond);
 
     }
         return 0;

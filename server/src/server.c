@@ -5,19 +5,24 @@ ouput: NULL
 */
 
 char text[1024];
+int done = 0;
 
 void* resolveClient(void* a)
 {
     clientPararameter* parameter = (clientPararameter*)a; 
-    printf("%s\n",parameter->command);
     if(strcmp(parameter->command,"send") == 0)
     {
-        sendText(parameter,text);
+        sendText(parameter,text,&done);
     }
     else if(strcmp(parameter->command,"receive") == 0)
     {
-        receiveText(parameter,text);
+        receiveText(parameter,text,&done);
     }
+    else
+    {
+        printf("command not found\n");
+    }
+    return NULL;
 }
 
 int main(int argc,char** argv)
@@ -64,8 +69,12 @@ int main(int argc,char** argv)
         char command1[100];
         char command2[100];
 
-        g_socket_receive(client1,command1,4,0,0);
-        g_socket_receive(client2,command2,4,0,0);
+        g_socket_receive(client1,command1,100,0,0);
+        g_socket_receive(client2,command2,100,0,0);
+
+        printf("%s\n",command1);
+        printf("%s\n",command2);
+
 
         if(strcmp(command2,command1) == 0)
         {
@@ -81,26 +90,31 @@ int main(int argc,char** argv)
         GCond cond;
         g_cond_init(&cond);
 
-        clientPararameter* cp = malloc(sizeof(clientPararameter));
-        cp -> cl1 = client1;
-        cp -> cl2 = client2;
-        cp -> mtx = &mtx;
-        cp -> cond = &cond;
-        strcpy(cp->command,command1);
+        clientPararameter* cp1 = malloc(sizeof(clientPararameter));
+        clientPararameter* cp2 = malloc(sizeof(clientPararameter));
+        cp1 -> cl1 = client1;
+        cp1 -> cl2 = client2;
+        cp1 -> mtx = mtx;
+        cp1 -> cond = cond;
+        strcpy(cp1->command,command1);
 
-        GThread t1;
-        GThread t2;
-        g_thread_new(&t1,resolveClient,cp);
+        GThread* t1;
+        GThread* t2;
+        
 
-        GSocket* aux;
-            aux = client1;
-            client1 = client2;
-            client2 = aux;
-        strcpy(cp->command,command2);
-        g_thread_new(&t2,resolveClient,cp); 
+        cp2 -> cl1 = client2;
+        cp2 -> cl2 = client1;
+        cp2 -> mtx = mtx;
+        cp2 -> cond = cond;
+        strcpy(cp2->command,command2);
+        
 
-        g_thread_join(&t1);
-        g_thread_join(&t2);
+
+        g_thread_new(t1,resolveClient,cp1);
+        g_thread_new(t2,resolveClient,cp2); 
+
+        //g_thread_join(t1);
+        //g_thread_join(t2);
 
         g_mutex_free(&mtx);
         g_cond_free(&cond);

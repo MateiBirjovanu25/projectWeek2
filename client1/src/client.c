@@ -35,7 +35,7 @@ int main(int argc,char** argv)
 {
     int port = atoi(argv[1]);
     struct sockaddr_in server;
-    GError *error = NULL;
+    //GError *error = NULL;
 
     server.sin_port=htons(port);
     server.sin_family=AF_INET;
@@ -59,11 +59,20 @@ int main(int argc,char** argv)
     scanf("%s",request);
     g_socket_send(socket,request,100,0,0);
 
-    if(strcmp(request,"send")==0)
-        send_file(socket);
-    else
-        receive_text(socket);
+    //Primesc de la server mesaj daca se poate face sau nu transferul
+    char message[100];
+    g_socket_receive(socket, message,100,0,0);
 
+    if(strcmp(message, "success")==0){
+        
+        if(strcmp(request,"send")==0)
+            send_file(socket);
+        else
+            receive_text(socket);
+
+    }
+    else
+        printf("Can't solve the request\n");
 
     return 0;
 }

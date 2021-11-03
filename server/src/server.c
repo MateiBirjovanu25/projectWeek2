@@ -9,6 +9,7 @@ char text[1024];
 void* resolveClient(void* a)
 {
     clientPararameter* parameter = (clientPararameter*)a; 
+    printf("%s\n",parameter->command);
     if(strcmp(parameter->command,"send") == 0)
     {
         sendText(parameter,text);

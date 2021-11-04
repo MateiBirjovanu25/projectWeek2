@@ -93,7 +93,6 @@ int main(int argc,char** argv)
 
         char text[1024];
         int done = 0;
-        int check = 0;
 
         cp1.cl1 = client1;
         cp1.cl2 = client2;
@@ -101,7 +100,6 @@ int main(int argc,char** argv)
         cp1.cond = cond;
         cp1.text = text;
         cp1.done = &done;
-        cp1.check = &check;
         strcpy(cp1.command,command1);
 
 
@@ -111,7 +109,6 @@ int main(int argc,char** argv)
         cp2.cond = cond;
         cp2.text = text;
         cp2.done = &done;
-        cp2.check = &check;
         strcpy(cp2.command,command2);
         
         t1=g_thread_new(0,resolveClient,&cp1);

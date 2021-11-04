@@ -8,7 +8,6 @@ typedef struct
     GCond cond;
     char* text;
     int* done;
-    int* check;
 }clientPararameter;
 
 /*

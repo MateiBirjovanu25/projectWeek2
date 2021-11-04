@@ -121,8 +121,6 @@ int main(int argc,char** argv)
         g_thread_join(t2);
 
 
-        printf("o,nu\n");
-
         g_mutex_clear(&mtx);
         g_cond_clear(&cond);
 

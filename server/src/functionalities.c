@@ -33,10 +33,9 @@ void receiveText(clientPararameter* parameter)
         g_mutex_unlock(&(parameter->mtx));
     }
 
-    
+
     printf("sending...\n");
     g_mutex_lock(&(parameter->mtx));
-    printf("...\n");
     g_socket_send(parameter->cl1,parameter->text,1024,0,0);
     g_mutex_unlock(&(parameter->mtx));
     printf("sent\n");

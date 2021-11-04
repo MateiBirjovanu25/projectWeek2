@@ -59,18 +59,25 @@ int main(int argc,char** argv)
     g_socket_send(socket, (gchar*)&client, 4, 0, 0);
 
     char msg[100];
+    printf("Urmatoarea actiune send/receive:\n");
+    scanf("%s", msg);
     g_socket_send(socket,msg,100,0,0);
-    printf("Urmatoarea actiune send/receive: %s\n", msg);
-    if(strcmp(msg, "send") == 0)
+
+    //Raspuns de la server
+    char message[100];
+    g_socket_receive(socket, message,100,0,0);
+
+    if(strcmp(message, "success") == 0)
     {
-        sendText(socket);
-    }
-    else{
-        if(strcmp(msg, "receive") == 0)
-            receiveText(socket);
+        
+        if(strcmp(request,"send") == 0)
+            sendText(socket);
         else
-            printf("Comanda introdusa nu este cunoscuta!\n");
+            receiveText(socket);
+
     }
+    else
+        printf("Request failed!\n");
 
     return 0;
 }

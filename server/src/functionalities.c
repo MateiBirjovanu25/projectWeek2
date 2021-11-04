@@ -1,26 +1,28 @@
 #include "functionalities.h"
 
 
-void sendText(clientPararameter* parameter,char* text,int* done)
+void sendText(clientPararameter* parameter)
 {
     g_mutex_lock(&parameter->mtx);
-    g_socket_receive(parameter->cl1,text,1024,0,0);
-    *done = 1;
-    g_cond_signal(&parameter->cond);
+    g_socket_receive(parameter->cl1,parameter->text,1024,0,0);
+    *parameter->done = 1;
+    g_cond_broadcast(&parameter->cond);
     printf("signal sent\n");
+    
     g_mutex_unlock(&parameter->mtx);
 }
 
-void receiveText(clientPararameter* parameter, char* text,int* done)
+void receiveText(clientPararameter* parameter)
 {
     g_mutex_lock(&parameter->mtx);
     printf("waiting...\n");
-    while(done == 0)
+    while(*parameter->done == 0)
     {
         g_cond_wait(&parameter->cond,&parameter->mtx);
+        
     }
     printf("sending...\n");
-    g_socket_send(parameter->cl1,text,1024,0,0);
+    g_socket_send(parameter->cl1,parameter->text,1024,0,0);
     printf("sent\n");
     g_mutex_unlock(&parameter->mtx);
 }

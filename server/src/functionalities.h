@@ -6,6 +6,8 @@ typedef struct
     char command[100];
     GMutex mtx;
     GCond cond;
+    char* text;
+    int* done;
 }clientPararameter;
 
 /*
@@ -13,6 +15,6 @@ input: clients:clientPar*, secondClient:GSocket*
 ouput: -
 receives text from one client and sends it to the other 
 */
-void sendText(clientPararameter*,char*,int*);
-void receiveText(clientPararameter*,char*,int*);
+void sendText(clientPararameter*);
+void receiveText(clientPararameter*);
 void dbTest();

@@ -9,7 +9,7 @@ void send_file(GSocket* socket){
     
     int fd = open(fileName,O_RDONLY);
     char text[1024];
-
+    bzero(text,1024);
     if(fd<0){
         strcpy(text, "Wrong path or file doesn't exist\n");
         printf("%s\n", text);

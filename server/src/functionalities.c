@@ -3,28 +3,44 @@
 
 void sendText(clientPararameter* parameter)
 {
-    g_mutex_lock(&parameter->mtx);
+    g_mutex_lock(&(parameter->mtx));
     g_socket_receive(parameter->cl1,parameter->text,1024,0,0);
-    *parameter->done = 1;
-    g_cond_broadcast(&parameter->cond);
+    g_mutex_unlock(&(parameter->mtx));
+
+    g_mutex_lock(&(parameter->mtx));
+    *(parameter->done) = 1;
+    //g_cond_signal(&(parameter->cond));
     printf("signal sent\n");
-    
-    g_mutex_unlock(&parameter->mtx);
+    g_mutex_unlock(&(parameter->mtx));
 }
 
 void receiveText(clientPararameter* parameter)
 {
-    g_mutex_lock(&parameter->mtx);
-    printf("waiting...\n");
-    while(*parameter->done == 0)
+    // g_mutex_lock(&(parameter->mtx));
+    // printf("waiting...\n");
+    // //while(*(parameter->done) == 0)
+    // //g_cond_wait(&(parameter->cond),&(parameter->mtx));
+    // g_mutex_unlock(&parameter->mtx);
+
+    while(1)
     {
-        g_cond_wait(&parameter->cond,&parameter->mtx);
-        
+        g_mutex_lock(&(parameter->mtx));
+        if(*(parameter->done) == 1)
+        {
+            g_mutex_unlock(&(parameter->mtx));
+            break;
+        }
+        g_mutex_unlock(&(parameter->mtx));
     }
+
+    
     printf("sending...\n");
+    g_mutex_lock(&(parameter->mtx));
+    printf("...\n");
     g_socket_send(parameter->cl1,parameter->text,1024,0,0);
+    g_mutex_unlock(&(parameter->mtx));
     printf("sent\n");
-    g_mutex_unlock(&parameter->mtx);
+    
 }
 
 

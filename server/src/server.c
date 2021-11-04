@@ -50,8 +50,11 @@ int main(int argc,char** argv)
 
 
         int clientType1,clientType2;
-        g_socket_receive(client1,&clientType1,4,0,0);
-        g_socket_receive(client2,&clientType2,4,0,0);
+        char clientString[20];
+        g_socket_receive(client1,clientString,4,0,0);
+        clientType1 = atoi(clientString);
+        g_socket_receive(client2,clientString,4,0,0);
+        clientType2 = atoi(clientString);
 
         //if client2 connected first, swap
         if(clientType1==2)
@@ -90,6 +93,7 @@ int main(int argc,char** argv)
 
         char text[1024];
         int done = 0;
+        int check = 0;
 
         cp1.cl1 = client1;
         cp1.cl2 = client2;
@@ -97,8 +101,9 @@ int main(int argc,char** argv)
         cp1.cond = cond;
         cp1.text = text;
         cp1.done = &done;
+        cp1.check = &check;
         strcpy(cp1.command,command1);
-        
+
 
         cp2.cl1 = client2;
         cp2.cl2 = client1;
@@ -106,13 +111,17 @@ int main(int argc,char** argv)
         cp2.cond = cond;
         cp2.text = text;
         cp2.done = &done;
+        cp2.check = &check;
         strcpy(cp2.command,command2);
         
         t1=g_thread_new(0,resolveClient,&cp1);
         t2=g_thread_new(0,resolveClient,&cp2); 
 
-        g_thread_join(t2);
         g_thread_join(t1);
+        g_thread_join(t2);
+
+
+        printf("o,nu\n");
 
         g_mutex_clear(&mtx);
         g_cond_clear(&cond);

@@ -47,7 +47,8 @@ int main(int argc,char** argv)
 
     activeClient activeClients[100]; //array of active clients
     GMutex mutexes[100]; //array of mutexes(each client has its own mutex)
-    int clientId = 0;
+    int clientId = 1;
+    g_mutex_init(&mutexes[0]);
     while(1)
     {
         GSocket* client = g_socket_accept(socket,0,0);
@@ -65,7 +66,7 @@ int main(int argc,char** argv)
         g_socket_receive(client,clientString,20,0,0); //receive the type of the client
         clientType = atoi(clientString);
 
-        g_socket_send(client,&aC.id,sizeof(int),0,0);  //send the id to the clients
+        g_socket_send(client,&aC.id,sizeof(int),0,0);  //send the id to the client
 
         GThread* t1;
 
@@ -75,7 +76,8 @@ int main(int argc,char** argv)
 
         g_socket_close(client,0);
     }
-    
+    g_mutex_clear(&mutexes[0]);
+    return 0;
 }
 
 

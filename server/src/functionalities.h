@@ -7,6 +7,5 @@ typedef struct
     activeClient* activeClients;
 }activeClient;
 
-void receiveText(activeClient,GMutex,char*,int*);
-void sendText(activeClient,GMutex,char*,int*);
+void receiveText(activeClient*,int);
 void dbTest();

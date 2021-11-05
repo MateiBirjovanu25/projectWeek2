@@ -16,13 +16,7 @@ void* resolveClient(void* a)
 
         if(strcmp(command,"receive") == 0)
         {
-            char text[1024];
-            int done = 0;
-            //receiveText(aC->activeClients[targetId],aC->mutexes[aC->id],text,&done);
-            //sendText(aC->activeClients[aC->id],aC->mutexes[aC->id],text,&done);
-            g_socket_send((aC->activeClients[targetId]).socket,"send",10,0,0);
-            g_socket_receive((aC->activeClients[targetId]).socket,text,1024,0,0);
-            g_socket_send(aC->socket,text,1024,0,0);
+            receiveText(aC,targetId);
         }
         else
         {

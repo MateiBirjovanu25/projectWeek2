@@ -1,38 +1,13 @@
 #include "functionalities.h"
 
 
-void receiveText(activeClient aC,GMutex mtx,char* text,int* done)
+void receiveText(activeClient* aC,int targetId)
 {
-    // g_mutex_lock(&mtx);
-    g_socket_send(aC.socket,"send",10,0,0);
-    g_socket_receive(aC.socket,text,1024,0,0);
-    // g_mutex_unlock(&mtx);
-
-    // g_mutex_lock(&mtx);
-    // *done = 1;
-
-    // printf("signal sent\n");
-    // g_mutex_unlock(&mtx);
-}
-
-void sendText(activeClient aC,GMutex mtx,char* text,int* done)
-{
-    // while(1)
-    // {
-    //     g_mutex_lock(&mtx);
-    //     if(*done == 1)
-    //     {
-    //         g_mutex_unlock(&mtx);
-    //         break;
-    //     }
-    //     g_mutex_unlock(&mtx);
-    // }
-    // printf("sending...\n");
-    // g_mutex_lock(&mtx);
-    g_socket_send(aC.socket,text,1024,0,0);
-    // g_mutex_unlock(&mtx);
-    // printf("sent\n");
-    
+    char text[1024];
+            int done = 0;
+            g_socket_send((aC->activeClients[targetId]).socket,"send",10,0,0);
+            g_socket_receive((aC->activeClients[targetId]).socket,text,1024,0,0);
+            g_socket_send(aC->socket,text,1024,0,0);
 }
 
 

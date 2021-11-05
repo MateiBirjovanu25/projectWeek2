@@ -68,8 +68,10 @@ int main(int argc,char** argv)
 
         int clientType;
         char clientString[20];
-        g_socket_receive(client,clientString,4,0,0);
+        g_socket_receive(client,clientString,20,0,0); //receive the type of the client
         clientType = atoi(clientString);
+
+        g_socket_send(client,&aC.id,sizeof(int),0,0);  //send the id to the clients
 
         GThread* t1;
 

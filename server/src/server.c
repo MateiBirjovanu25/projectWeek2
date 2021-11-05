@@ -1,23 +1,33 @@
 #include "functionalities.h"
-/*
-input: void* parameter -> struct containing the sockets of the 2 clients
-ouput: NULL
-*/
 
 void* resolveClient(void* a)
 {
-    clientPararameter* parameter = (clientPararameter*)a; 
-    if(strcmp(parameter->command,"send") == 0)
+    activeClient* aC = (activeClient*) a;
+    char command[100]; //command received from client
+    int targetId; //the id of the other client
+    char* intBuffer[20]; //pointer used for receiving numbers
+    g_mutex_init(&aC->mutexes[aC->id]);
+    while(1)
     {
-        sendText(parameter);
-    }
-    else if(strcmp(parameter->command,"receive") == 0)
-    {
-        receiveText(parameter);
-    }
-    else
-    {
-        printf("command not found\n");
+        g_socket_receive(aC->socket,command,100,0,0); // receive command
+        g_socket_receive(aC->socket,intBuffer,20,0,0); //receive target id
+        targetId = atoi(intBuffer);
+        bzero(intBuffer,20);
+
+        if(strcmp(command,"receive") == 0)
+        {
+            char text[1024];
+            int done = 0;
+            //receiveText(aC->activeClients[targetId],aC->mutexes[aC->id],text,&done);
+            //sendText(aC->activeClients[aC->id],aC->mutexes[aC->id],text,&done);
+            g_socket_send(aC->socket,"send",10,0,0);
+            g_socket_receive(aC->socket,text,1024,0,0);
+            g_socket_send(aC->socket,text,1024,0,0);
+        }
+        else
+        {
+            printf("command not found\n");
+        }
     }
     return NULL;
 }
@@ -42,87 +52,33 @@ int main(int argc,char** argv)
 
     g_socket_listen(socket,0);
 
+    activeClient activeClients[100]; //array of active clients
+    GMutex mutexes[100]; //array of mutexes(each client has its own mutex)
+    int clientId = 0;
     while(1)
     {
-        GSocket* client1 = g_socket_accept(socket,0,0);
-        GSocket* client2 = g_socket_accept(socket,0,0);
-        printf("Clients connected\n");
-        if(fork() == 0)
-        {
-            int clientType1,clientType2;
-            char clientString[20];
-            g_socket_receive(client1,clientString,4,0,0);
-            clientType1 = atoi(clientString);
-            g_socket_receive(client2,clientString,4,0,0);
-            clientType2 = atoi(clientString);
+        GSocket* client = g_socket_accept(socket,0,0);
+        activeClient aC;
+        aC.id = clientId;
+        aC.socket = client;
+        aC.activeClients = activeClients;
+        aC.mutexes = mutexes;
+        activeClients[clientId] = aC;
+        clientId++;
 
-            //if client2 connected first, swap
-            if(clientType1==2)
-            {
-                GSocket* aux;
-                aux = client1;
-                client1 = client2;
-                client2 = aux;
-            }
+        int clientType;
+        char clientString[20];
+        g_socket_receive(client,clientString,4,0,0);
+        clientType = atoi(clientString);
 
-            
-            char command1[100];
-            char command2[100];
+        GThread* t1;
 
-            g_socket_receive(client1,command1,100,0,0);
-            g_socket_receive(client2,command2,100,0,0);
+        t1=g_thread_new(0,resolveClient,&aC);
 
-            if(strcmp(command2,command1) == 0)
-            {
-                g_socket_send(client1,"error",10,0,0);
-                g_socket_send(client2,"error",10,0,0);
-                continue;
-            }
-            g_socket_send(client2,"success",10,0,0);
-            g_socket_send(client1,"success",10,0,0);
+        g_thread_join(t1);
 
-            GMutex mtx;
-            g_mutex_init(&mtx);
-            GCond cond;
-            g_cond_init(&cond);
-
-            clientPararameter cp1;
-            clientPararameter cp2;
-            GThread* t1;
-            GThread* t2;
-
-            char text[1024];
-            int done = 0;
-
-            cp1.cl1 = client1;
-            cp1.cl2 = client2;
-            cp1.mtx = mtx;
-            cp1.cond = cond;
-            cp1.text = text;
-            cp1.done = &done;
-            strcpy(cp1.command,command1);
-
-
-            cp2.cl1 = client2;
-            cp2.cl2 = client1;
-            cp2.mtx = mtx;
-            cp2.cond = cond;
-            cp2.text = text;
-            cp2.done = &done;
-            strcpy(cp2.command,command2);
-            
-            t1=g_thread_new(0,resolveClient,&cp1);
-            t2=g_thread_new(0,resolveClient,&cp2); 
-
-            g_thread_join(t1);
-            g_thread_join(t2);
-
-
-            g_mutex_clear(&mtx);
-            g_cond_clear(&cond);
-        }
+        g_socket_close(client,0);
     }
-    
     
 }
 

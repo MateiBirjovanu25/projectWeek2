@@ -1,15 +1,12 @@
 #include "../include.h"
-typedef struct 
+typedef struct
 {
-    GSocket* cl1;
-    GSocket* cl2;
-    char command[100];
-    GMutex mtx;
-    GCond cond;
-    char* text;
-    int* done;
-}clientPararameter;
+    GSocket* socket;
+    int id;
+    GMutex* mutexes;
+    activeClient* activeClients;
+}activeClient;
 
-void sendText(clientPararameter*);
-void receiveText(clientPararameter*);
+void receiveText(activeClient,GMutex,char*,int*);
+void sendText(activeClient,GMutex,char*,int*);
 void dbTest();

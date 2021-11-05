@@ -1,44 +1,37 @@
 #include "functionalities.h"
 
 
-void sendText(clientPararameter* parameter)
+void receiveText(activeClient aC,GMutex mtx,char* text,int* done)
 {
-    g_mutex_lock(&(parameter->mtx));
-    g_socket_receive(parameter->cl1,parameter->text,1024,0,0);
-    g_mutex_unlock(&(parameter->mtx));
+    // g_mutex_lock(&mtx);
+    g_socket_send(aC.socket,"send",10,0,0);
+    g_socket_receive(aC.socket,text,1024,0,0);
+    // g_mutex_unlock(&mtx);
 
-    g_mutex_lock(&(parameter->mtx));
-    *(parameter->done) = 1;
-    //g_cond_signal(&(parameter->cond));
-    printf("signal sent\n");
-    g_mutex_unlock(&(parameter->mtx));
+    // g_mutex_lock(&mtx);
+    // *done = 1;
+
+    // printf("signal sent\n");
+    // g_mutex_unlock(&mtx);
 }
 
-void receiveText(clientPararameter* parameter)
+void sendText(activeClient aC,GMutex mtx,char* text,int* done)
 {
-    // g_mutex_lock(&(parameter->mtx));
-    // printf("waiting...\n");
-    // //while(*(parameter->done) == 0)
-    // //g_cond_wait(&(parameter->cond),&(parameter->mtx));
-    // g_mutex_unlock(&parameter->mtx);
-
-    while(1)
-    {
-        g_mutex_lock(&(parameter->mtx));
-        if(*(parameter->done) == 1)
-        {
-            g_mutex_unlock(&(parameter->mtx));
-            break;
-        }
-        g_mutex_unlock(&(parameter->mtx));
-    }
-
-
-    printf("sending...\n");
-    g_mutex_lock(&(parameter->mtx));
-    g_socket_send(parameter->cl1,parameter->text,1024,0,0);
-    g_mutex_unlock(&(parameter->mtx));
-    printf("sent\n");
+    // while(1)
+    // {
+    //     g_mutex_lock(&mtx);
+    //     if(*done == 1)
+    //     {
+    //         g_mutex_unlock(&mtx);
+    //         break;
+    //     }
+    //     g_mutex_unlock(&mtx);
+    // }
+    // printf("sending...\n");
+    // g_mutex_lock(&mtx);
+    g_socket_send(aC.socket,text,1024,0,0);
+    // g_mutex_unlock(&mtx);
+    // printf("sent\n");
     
 }
 

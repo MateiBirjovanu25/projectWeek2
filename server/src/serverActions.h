@@ -4,7 +4,7 @@ typedef struct
     GSocket* socket;
     int id;
     GMutex* mutexes;
-    activeClient* activeClients;
+    struct activeClient* activeClients;
 }activeClient;
 
 void receiveText(activeClient*,int);

@@ -1,13 +1,14 @@
-#include "functionalities.h"
+#include "serverActions.h"
 
 
 void receiveText(activeClient* aC,int targetId)
 {
+    activeClient* clients = aC->activeClients;
     char text[1024];
-            int done = 0;
-            g_socket_send((aC->activeClients[targetId]).socket,"send",10,0,0);
-            g_socket_receive((aC->activeClients[targetId]).socket,text,1024,0,0);
-            g_socket_send(aC->socket,text,1024,0,0);
+    int done = 0;
+    g_socket_send(clients[targetId].socket,"send",10,0,0);
+    g_socket_receive(clients[targetId].socket,text,1024,0,0);
+    g_socket_send(aC->socket,text,1024,0,0);
 }
 
 

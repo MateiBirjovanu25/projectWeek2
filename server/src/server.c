@@ -1,11 +1,11 @@
-#include "functionalities.h"
+#include "serverActions.h"
 
 void* resolveClient(void* a)
 {
     activeClient* aC = (activeClient*) a;
     char command[100]; //command received from client
     int targetId; //the id of the other client
-    char* intBuffer[20]; //pointer used for receiving numbers
+    char intBuffer[20]; //pointer used for receiving numbers
     g_mutex_init(&aC->mutexes[aC->id]);
     while(1)
     {

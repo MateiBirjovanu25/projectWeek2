@@ -18,6 +18,10 @@ void* resolveClient(void* a)
         {
             receiveText(aC,targetId);
         }
+        else if(strcmp(command,"exit") == 0)
+        {
+            return NULL;
+        }
         else
         {
             printf("command not found\n");

@@ -14,7 +14,7 @@ void* resolveClient(void* a)
         targetId = atoi(intBuffer);
         bzero(intBuffer,20);
 
-        if(strcmp(command,"receive") == 0)
+        if(strcmp(command,"receive text") == 0)
         {
             receiveText(aC,targetId);
         }

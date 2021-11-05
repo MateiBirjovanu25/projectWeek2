@@ -49,3 +49,13 @@ void dbTest()
         printf("\n");
     }
 }
+
+
+void sodiumTest()
+{
+    unsigned char hash[crypto_generichash_BYTES];
+    crypto_generichash(hash,sizeof(hash),"caine",6,0,0);
+    printf("%s\n",hash);
+    crypto_generichash(hash,sizeof(hash),"cainl",6,0,0);
+    printf("%s\n",hash);
+}

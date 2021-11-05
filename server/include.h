@@ -12,3 +12,4 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <mysql.h>
+#include <sodium.h>

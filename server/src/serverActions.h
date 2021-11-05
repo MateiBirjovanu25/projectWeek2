@@ -9,3 +9,4 @@ typedef struct
 
 void receiveText(activeClient*,int);
 void dbTest();
+void sodiumTest();

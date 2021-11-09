@@ -51,7 +51,21 @@ int main(int argc,char** argv)
     GSocket* socket = g_socket_new(G_SOCKET_FAMILY_IPV4,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP,NULL);
     GSocketAddress* address = g_socket_address_new_from_native(&server,sizeof(server));
 
+<<<<<<< HEAD
     while(1){
+=======
+    if(g_socket_connect(socket,address,0,0)==0)
+    {
+        printf("Eroare de conectare\n");
+        exit(1);
+    }
+    else
+        printf("Conectare efectuata cu succes!\n");
+
+    //Client 1 decides if he sends or receives info
+    int nr_client = 1;
+    g_socket_send(socket,(gchar*)&nr_client,sizeof(int),0,0);
+>>>>>>> cf840d0 (update multithread func)
 
         if(g_socket_connect(socket,address,0,0)==0)
         {

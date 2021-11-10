@@ -12,7 +12,9 @@ void* command_menu(void* arg){
 
         printf("Enter command number:\n");
         printf("1.receive from clientId (you have to insert it) \n");
-        printf("2.send\n");
+        printf("2.send to client_id\n");
+        
+        scanf("%d %d", &command_number, &from_client_id);
 
         switch (command_number)
         {

@@ -56,6 +56,7 @@ int main(int argc,char** argv)
     while(1)
     {
         GSocket* client = g_socket_accept(socket,0,0);
+        printf("cient connected\n");
         activeClient aC;
         aC.id = clientId;
         aC.socket = client;
@@ -66,17 +67,17 @@ int main(int argc,char** argv)
         clientId++;
 
         int clientType;
-        char clientString[20];
-        g_socket_receive(client,clientString,20,0,0); //receive the type of the client
-        clientType = atoi(clientString);
-
+        //char clientString[20];
+        g_socket_receive(client,&clientType,4,0,0); //receive the type of the client
+        //clientType = atoi(clientString);
+        printf("client %d\n",clientType);
         g_socket_send(client,&aC.id,sizeof(int),0,0);  //send the id to the client
 
         GThread* t1;
 
         t1=g_thread_new(0,resolveClient,&aC);
 
-        g_thread_join(t1);
+        //g_thread_join(t1);
 
         g_socket_close(client,0);
     }

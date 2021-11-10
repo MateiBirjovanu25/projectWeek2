@@ -5,9 +5,10 @@
 #include <gio/gio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <netinet/ip.h>
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
+#include <mysql.h>
+#include <sodium.h>

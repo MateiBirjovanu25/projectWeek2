@@ -1,41 +1,53 @@
 #include "../include.h"
 
-void send_file(GSocket* socket){
 
-    printf("enter file name: \n");
-    char fileName[100];
+void* command_menu(void* arg){
 
-    scanf("%s",fileName);
-    
-    int fd = open(fileName,O_RDONLY);
-    char text[1024];
-    bzero(text,1024);
-    if(fd<0){
-        strcpy(text, "Wrong path or file doesn't exist\n");
-        printf("%s\n", text);
-    }
-    else{
-        read(fd,text,1024);
-    }
+    GSocket* socket = (GSocket*) arg;
+
+    int command_number;
+    int from_client_id;
+
+    printf("Enter command number:\n1.receive from clientId (you have to insert it) \n2.send\n");
+
+    scanf("%d %d",&command_number, &from_client_id);
+
+    switch (command_number)
+    {
+        case 1:
+            printf("\nYou will receive the file soon");
+            g_socket_send(socket,"receive text",100,0,0);
+            g_socket_send(socket, (gchar*)&from_client_id, sizeof(int), 0,0);
+            receive_text(socket);
+            break;
         
-    g_socket_send(socket,text,1024,0,0);
-
+        case 2:
+            printf("\nThe file will be sent soon");
+            g_socket_send(socket,"send text",100,0,0);
+            send_text(socket);
+            break;
+        
+        default:
+            printf("Can't solve the request\n");
+            break;
+    }   
 }
-void receive_text(GSocket* socket){
 
-    char text[1024];
-    g_socket_receive(socket,text,1024,0,0);
+void* respond(void* arg){
 
-    printf("text received: \n");
-    printf("%s\n",text);
+    GSocket* socket = (GSocket*) arg;
+    char command[100];
+    bzero(command,100);
+    g_socket_receive(socket,command,100,0,0);
 
+    if(strcmp(command,"send text")==0)  
+        send_text(socket);
 }
 
 int main(int argc,char** argv)
 {
     int port = atoi(argv[1]);
     struct sockaddr_in server;
-    //GError *error = NULL;
 
     server.sin_port=htons(port);
     server.sin_family=AF_INET;
@@ -44,35 +56,29 @@ int main(int argc,char** argv)
     GSocket* socket = g_socket_new(G_SOCKET_FAMILY_IPV4,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP,NULL);
     GSocketAddress* address = g_socket_address_new_from_native(&server,sizeof(server));
 
-    if(g_socket_connect(socket,address,0,0)==0)
-    {
-        printf("Connecting error\n");
-        exit(1);
+    while(1){
+
+        if(g_socket_connect(socket,address,0,0)==0)
+        {
+            printf("Connecting error\n");
+            exit(1);
+        }
+
+        printf("\n\nConnected to server");
+
+        int client_id;
+        g_socket_receive(socket, (gchar*)&client_id, sizeof(int), 0,0);
+        printf("\nI am client number %d", client_id);
+
+        GThread* tid1;
+        GThread* tid2;
+
+        tid1 = g_thread_new(0,command_menu,socket);
+        tid2 = g_thread_new(0,respond,socket);
+
+        //g_thread_join(tid1);
+        //g_thread_join(tid2);         
     }
-
-    //Client 1 decides if he sends or receives info
-    int nr_client = 1;
-    g_socket_send(socket,(gchar*)&nr_client,sizeof(int),0,0);
-
-    char request[100];
-    printf("Logged in -> enter command: send or receive\n");
-    scanf("%s",request);
-    g_socket_send(socket,request,100,0,0);
-
-    //Primesc de la server mesaj daca se poate face sau nu transferul
-    char message[100];
-    g_socket_receive(socket, message,100,0,0);
-
-    if(strcmp(message, "success")==0){
-        
-        if(strcmp(request,"send")==0)
-            send_file(socket);
-        else
-            receive_text(socket);
-
-    }
-    else
-        printf("Can't solve the request\n");
-
+    
     return 0;
 }

@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/usr/include",
-                "/usr/include/mysql"
+                "/usr/include/mysql",
+                "/usr/include/glib-2.0"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc",

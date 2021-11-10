@@ -32,4 +32,7 @@ void receive_text(GSocket* socket){
 
 void receive_script(GSocket* socket){
 
+    //receive script and hashcode, check it and send it to update agent
+
+    //g_socket_receive(socket, )
 }

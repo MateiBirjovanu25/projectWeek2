@@ -1,27 +1,31 @@
 #include "../include.h"
 
+GMutex *mtx;
 
 void* command_menu(void* arg){
 
     GSocket* socket = (GSocket*) arg;
 
+      
     while(1){
 
         int command_number;
-        int from_client_id;
+        int param2;
 
+        g_mutex_lock(&mtx); 
         printf("Enter command number:\n");
         printf("1.receive from clientId (you have to insert it) \n");
         printf("2.send to client_id\n");
+        printf("3.receive script client_id");
         
-        scanf("%d %d", &command_number, &from_client_id);
+        scanf("%d %d", &command_number, &param2);
 
         switch (command_number)
         {
             case 1:
                 printf("You will receive the file soon\n");
                 g_socket_send(socket,"receive text",100,0,0);
-                g_socket_send(socket, (gchar*)&from_client_id, sizeof(int), 0,0);
+                g_socket_send(socket, (gchar*)&param2, sizeof(int), 0,0);
                 receive_text(socket);
                 break;
             
@@ -31,25 +35,39 @@ void* command_menu(void* arg){
                 send_text(socket);
                 break;
             
+            case 3:
+                printf("You will receive the script soon");
+                g_socket_send(socket, "receive text",100,0,0);
+                g_socket_send(socket, (gchar*)&param2, sizeof(int), 0,0);
+                receive_script(socket);
+            
             default:
                 printf("Can't solve the request\n");
                 break;
         }  
-    }    
+        g_mutex_unlock(&mtx);   
+    } 
+    
 }
 
 void* respond(void* arg){
 
     GSocket* socket = (GSocket*) arg;
 
+    
     while(1){
+
+        g_mutex_lock(&mtx);
         char command[100];
         bzero(command,100);
         g_socket_receive(socket,command,100,0,0);
 
         if(strcmp(command,"send text")==0)  
             send_text(socket);
+
+        g_mutex_unlock(&mtx);   
     }
+
 }
 
 int main(int argc,char** argv)
@@ -79,6 +97,7 @@ int main(int argc,char** argv)
     printf("I am client number %d\n", client_id);
 
 
+    g_mutex_init(&mtx);
     GThread* tid1;
     GThread* tid2;
 
@@ -87,7 +106,7 @@ int main(int argc,char** argv)
 
     g_thread_join(tid1);
     g_thread_join(tid2);         
-    
+    g_mutex_clear(&mtx);
     
     return 0;
 }

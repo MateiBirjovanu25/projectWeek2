@@ -64,7 +64,7 @@ int main(int argc,char** argv)
     GSocket* socket = g_socket_new(G_SOCKET_FAMILY_IPV4,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP,NULL);
     GSocketAddress* address = g_socket_address_new_from_native(&server,sizeof(server));
 
-    while(1){
+    
 
         if(g_socket_connect(socket,address,0,0)==0)
         {
@@ -88,7 +88,7 @@ int main(int argc,char** argv)
 
         g_thread_join(tid1);
         g_thread_join(tid2);         
-    }
+    
     
     return 0;
 }

@@ -4,9 +4,9 @@
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
-server.o
-serverActions.o
-serverBuild
+serverserver.o
+server/serverActions.o
+server/serverBuild
 
 # Local History for Visual Studio Code
 .history/

@@ -7,10 +7,10 @@ void receiveText(activeClient* aC,int targetId)
     char text[1024];
     GMutex mtx = aC->mutexes[targetId];
     g_mutex_lock(&mtx); //lock the mutex in order to stom other threads from interfering with the transfer
-        g_socket_send(clients[targetId].socket,"send text",10,0,0);
-        g_socket_receive(clients[targetId].socket,text,1024,0,0);
+        g_socket_send(&clients[targetId].socket,"send text",10,0,0);
+        g_socket_receive(&clients[targetId].socket,text,1024,0,0);
     g_mutex_unlock(&mtx);
-        g_socket_send(aC->socket,text,1024,0,0);
+        g_socket_send(&aC->socket,text,1024,0,0);
 }
 
 

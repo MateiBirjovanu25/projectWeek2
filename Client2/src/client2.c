@@ -65,6 +65,7 @@ int main(int argc,char** argv)
 
     //Raspuns de la server
     char message[100];
+    char request[100];
     g_socket_receive(socket, message,100,0,0);
 
     if(strcmp(message, "success") == 0)

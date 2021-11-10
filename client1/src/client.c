@@ -61,11 +61,18 @@ void* respond(void* arg){
         char command[100];
         bzero(command,100);
         g_socket_receive(socket,command,100,0,0);
+        //printf("command received: %s\n",command);
 
         if(strcmp(command,"send text")==0)  
+        {
+            printf("send\n");
             send_text(socket);
+<<<<<<< HEAD
 
         g_mutex_unlock(&mtx);   
+=======
+        }
+>>>>>>> 76a426d256bc1b61aabfcc49c360b6403227c92c
     }
 
 }
@@ -90,7 +97,8 @@ int main(int argc,char** argv)
 
     printf("Connected to server\n");
 
-    g_socket_send(socket, (gchar*)CLIENT_ID, sizeof(CLIENT_ID), 0,0);
+    int clientType = 1;
+    g_socket_send(socket, &clientType, 4, 0,0);
 
     int client_id;
     g_socket_receive(socket, (gchar*)&client_id, sizeof(int), 0,0);

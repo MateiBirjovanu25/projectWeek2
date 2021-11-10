@@ -1,4 +1,4 @@
-#include "../include.h"
+#include "client2_func.h"
 
 void sendText(GSocket* socket)
 {

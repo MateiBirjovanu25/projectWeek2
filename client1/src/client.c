@@ -5,43 +5,51 @@ void* command_menu(void* arg){
 
     GSocket* socket = (GSocket*) arg;
 
-    int command_number;
-    int from_client_id;
+    while(1){
 
-    printf("Enter command number:\n1.receive from clientId (you have to insert it) \n2.send\n");
+        int command_number;
+        int from_client_id;
 
-    scanf("%d %d",&command_number, &from_client_id);
+        printf("Enter command number:\n");
+        printf("1.receive from clientId (you have to insert it) \n");
+        printf("2.send\n");
 
-    switch (command_number)
-    {
-        case 1:
-            printf("\nYou will receive the file soon");
-            g_socket_send(socket,"receive text",100,0,0);
-            g_socket_send(socket, (gchar*)&from_client_id, sizeof(int), 0,0);
-            receive_text(socket);
-            break;
-        
-        case 2:
-            printf("\nThe file will be sent soon");
-            g_socket_send(socket,"send text",100,0,0);
-            send_text(socket);
-            break;
-        
-        default:
-            printf("Can't solve the request\n");
-            break;
-    }   
+        scanf("%d %d",&command_number, &from_client_id);
+
+        switch (command_number)
+        {
+            case 1:
+                printf("You will receive the file soon\n");
+                g_socket_send(socket,"receive text",100,0,0);
+                g_socket_send(socket, (gchar*)&from_client_id, sizeof(int), 0,0);
+                receive_text(socket);
+                break;
+            
+            case 2:
+                printf("The file will be sent soon\n");
+                g_socket_send(socket,"send text",100,0,0);
+                send_text(socket);
+                break;
+            
+            default:
+                printf("Can't solve the request\n");
+                break;
+        }  
+    } 
 }
 
 void* respond(void* arg){
 
     GSocket* socket = (GSocket*) arg;
-    char command[100];
-    bzero(command,100);
-    g_socket_receive(socket,command,100,0,0);
 
-    if(strcmp(command,"send text")==0)  
-        send_text(socket);
+    while(1){
+        char command[100];
+        bzero(command,100);
+        g_socket_receive(socket,command,100,0,0);
+
+        if(strcmp(command,"send text")==0)  
+            send_text(socket);
+    }
 }
 
 int main(int argc,char** argv)
@@ -64,11 +72,13 @@ int main(int argc,char** argv)
             exit(1);
         }
 
-        printf("\n\nConnected to server");
+        printf("Connected to server\n");
+        
+        g_socket_send(socket, (gchar*)CLIENT_ID, sizeof(CLIENT_ID),0,0);
 
         int client_id;
         g_socket_receive(socket, (gchar*)&client_id, sizeof(int), 0,0);
-        printf("\nI am client number %d", client_id);
+        printf("I am client number %d\n", client_id);
 
         GThread* tid1;
         GThread* tid2;
@@ -76,8 +86,8 @@ int main(int argc,char** argv)
         tid1 = g_thread_new(0,command_menu,socket);
         tid2 = g_thread_new(0,respond,socket);
 
-        //g_thread_join(tid1);
-        //g_thread_join(tid2);         
+        g_thread_join(tid1);
+        g_thread_join(tid2);         
     }
     
     return 0;

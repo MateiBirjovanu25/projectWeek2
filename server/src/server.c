@@ -7,16 +7,18 @@ void* resolveClient(void* a)
     int targetId; //the id of the other client
     char intBuffer[20]; //pointer used for receiving numbers
     g_mutex_init(&aC->mutexes[aC->id]);
+    printf("socket in thread: %d\n",aC->socket);
     while(1)
     {
+        //printf("waiting for command\n");
         g_socket_receive(aC->socket,command,100,0,0); // receive command
-        g_socket_receive(aC->socket,intBuffer,20,0,0); //receive target id
-        targetId = atoi(intBuffer);
-        bzero(intBuffer,20);
-
+        g_socket_receive(aC->socket,&targetId,4,0,0); //receive target id
+        //printf("received: %s\n",command);
         if(strcmp(command,"receive text") == 0)
         {
+            printf("receive request\n");
             receiveText(aC,targetId);
+            printf("sent receive request to %d\n",targetId);
         }
         else if(strcmp(command,"exit") == 0)
         {
@@ -24,7 +26,7 @@ void* resolveClient(void* a)
         }
         else
         {
-            printf("command not found\n");
+            //printf("command not found\n");
         }
     }
     return NULL;
@@ -65,21 +67,14 @@ int main(int argc,char** argv)
 
         activeClients[clientId] = aC;
         clientId++;
-
         int clientType;
-        //char clientString[20];
         g_socket_receive(client,&clientType,4,0,0); //receive the type of the client
-        //clientType = atoi(clientString);
         printf("client %d\n",clientType);
         g_socket_send(client,&aC.id,sizeof(int),0,0);  //send the id to the client
-
+        printf("socket in main: %d\n",client);
         GThread* t1;
 
         t1=g_thread_new(0,resolveClient,&aC);
-
-        //g_thread_join(t1);
-
-        g_socket_close(client,0);
     }
     g_mutex_clear(&mutexes[0]);
     return 0;

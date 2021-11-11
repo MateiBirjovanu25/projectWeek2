@@ -2,15 +2,16 @@
 
 int clientID;
 
-void* commands(void* arg){
+void* commands(void* arg)
+{
     GSocket* socket = (GSocket*) arg;
     int command, targetID;
 
     printf("Enter a command:\n");
     printf("1.Receive from a client specified by ID \n");
     printf("2.Exit.\n");
+    while(1){
     scanf("%d %d",&command, &targetID);
-
     if(command == 1)
     {
         printf("Receiving...\n");
@@ -20,22 +21,23 @@ void* commands(void* arg){
     }
     else{
         if(command == 2)
-        {
             printf("Exit...\n");
-        }
         else
-            printf("Command not found!\n");
+            printf("Command not found!\n");}
     }
 }
 
-void* respond(void* arg){
+void* respond(void* arg)
+{
 
     GSocket* socket = (GSocket*) arg;
+    while(1){
     char msg[20];
     bzero(msg, 20);
     g_socket_receive(socket, msg, 20, 0, 0);
     if(strcmp(msg, "send text") == 0)
         send_text(socket);
+    }
 }
 
 int main(int argc,char** argv)
@@ -55,30 +57,28 @@ int main(int argc,char** argv)
     else
         printf("Socket created successfully!\n");
 
-    while(1)
+    if(g_socket_connect(socket,address, 0, 0) == 0)
     {
-        if(g_socket_connect(socket,address, 0, 0) == 0)
-        {
-            printf("Connecting error! \n");
-            exit(1);
-        }
-        else
-            printf("Connected!\n");
-
-        int client = 2;
-        char clientType[20];
-        g_socket_send(socket, (gchar*)&client, 4, 0, 0);
-        g_socket_receive(socket, clientType, 20, 0, 0);
-        clientID = atoi(clientType);
-
-        GThread* t1;
-        GThread* t2;
-
-        t1 = g_thread_new(0,commands,socket);
-        t2 = g_thread_new(0,respond,socket);
-
-        g_thread_join(t1);
-        g_thread_join(t2);  
+        printf("Connecting error! \n");
+        exit(1);
     }
+    else
+        printf("Connected!\n");
+
+    int client = 2;
+    char clientType[20];
+    g_socket_send(socket, (gchar*)&client, 4, 0, 0);
+    g_socket_receive(socket, clientType, 20, 0, 0);
+    clientID = atoi(clientType);
+
+    GThread* t1;
+    GThread* t2;
+
+    t1 = g_thread_new(0,commands,socket);
+    t2 = g_thread_new(0,respond,socket);
+
+    g_thread_join(t1);
+    g_thread_join(t2);  
+    
     return 0;
 }

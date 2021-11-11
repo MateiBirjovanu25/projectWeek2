@@ -1,9 +1,9 @@
 #include "../include.h"
 typedef struct
 {
-    GSocket* socket;
+    GSocket *socket;
     int id;
-    GMutex* mutexes;
+    GMutex *mutexes;
     struct activeClient* activeClients;
 }activeClient;
 

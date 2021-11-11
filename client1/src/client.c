@@ -17,6 +17,7 @@ void* command_menu(void* arg){
         printf("1.receive from clientId (you have to insert it) \n");
         //printf("2.send to client_id\n");
         printf("3.receive script client_id");
+
         
         scanf("%d %d", &command_number, &param2);
 
@@ -70,11 +71,16 @@ void* respond(void* arg){
         char command[100];
         bzero(command,100);
         g_socket_receive(socket,command,100,0,0);
+        //printf("command received: %s\n",command);
 
         if(strcmp(command,"send text")==0)  
+        {
+            printf("send\n");
             send_text(socket);
-
+        }
         g_mutex_unlock(&mtx);   
+        
+
     }
 
 }
@@ -99,7 +105,8 @@ int main(int argc,char** argv)
 
     printf("Connected to server\n");
 
-    g_socket_send(socket, (gchar*)CLIENT_ID, sizeof(CLIENT_ID), 0,0);
+    int clientType = 1;
+    g_socket_send(socket, &clientType, 4, 0,0);
 
     int client_id;
     g_socket_receive(socket, (gchar*)&client_id, sizeof(int), 0,0);

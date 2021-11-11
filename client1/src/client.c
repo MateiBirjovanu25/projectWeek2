@@ -1,4 +1,4 @@
-#include "../include.h"
+#include "client_actions.h"
 
 GMutex *mtx;
 
@@ -11,14 +11,12 @@ void* command_menu(void* arg){
 
         int command_number;
         int param2;
-
-        
+       
         printf("Enter command number:\n");
         printf("1.receive from clientId (you have to insert it) \n");
         //printf("2.send to client_id\n");
         printf("3.receive script client_id");
-
-        
+      
         scanf("%d %d", &command_number, &param2);
 
         g_mutex_lock(&mtx); 
@@ -26,7 +24,7 @@ void* command_menu(void* arg){
         {
             case 1:
                 printf("You will receive the file soon\n");
-                char text[20];
+                char text[20]="";
                 sprintf(text, "%d", param2); 
                 char command[100] = "receive text ";
                 strcat(command,text);
@@ -42,11 +40,12 @@ void* command_menu(void* arg){
                 break;
             */
             case 3:
-                char text[20];
-                sprintf(text, "%d", param2); 
-                char command[100] = "receive script ";
-                strcat(command,text);
-                g_socket_send(socket, command,100,0,0);
+                printf("You will receive the script soon");
+                char text3[20]="";
+                sprintf(text3, "%d", param2); 
+                char command3[100] = "receive script ";
+                strcat(command3,text3);
+                g_socket_send(socket, command3,100,0,0);
                 //g_socket_send(socket, (gchar*)&param2, sizeof(int), 0,0);
                 receive_script(socket);
                 break;

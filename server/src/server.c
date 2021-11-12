@@ -1,5 +1,6 @@
 #include "serverActions.h"
 
+
 void* resolveClient(void* a)
 {
     activeClient* aC = (activeClient*) a;
@@ -9,16 +10,21 @@ void* resolveClient(void* a)
     g_mutex_init(&aC->mutexes[aC->id]);
     printf("socket in thread: %d\n",aC->socket);
     while(1)
-    {
-        //printf("waiting for command\n");
+    {   
+        printf("waiting for command\n");
+        while(aC->working == true);
         g_socket_receive(aC->socket,command,100,0,0); // receive command
-        g_socket_receive(aC->socket,&targetId,4,0,0); //receive target id
-        //printf("received: %s\n",command);
+        printf("received command: %s\n",command);
+        targetId = parseText(command);
+        printf("command: %s\n",command);
+        printf("id: %d\n",targetId);
         if(strcmp(command,"receive text") == 0)
         {
-            printf("receive request\n");
+            aC->checkArray[aC->id]++;
+            aC->working = true;
+            printf("working: %d\n",aC->working);
+            printf("received request\n");
             receiveText(aC,targetId);
-            printf("sent receive request to %d\n",targetId);
         }
         else if(strcmp(command,"exit") == 0)
         {
@@ -28,9 +34,39 @@ void* resolveClient(void* a)
         {
             //printf("command not found\n");
         }
+        aC->working = false;
+        printf("working: %d\n",aC->working);
     }
     return NULL;
 }
+
+void watchDog(int* checkArray, GThread* threads,activeClient* clients,int* clientId)
+{
+    int oldValues[100];
+    for(int i=0;i<100;i++)
+        oldValues[i]=-1;
+    while(1)
+    {
+        if(*clientId!=1)
+        {
+            sleep(5);
+            for(int i=1;i<*clientId;i++)
+            {   
+                if(checkArray[i] == oldValues[i])
+                {
+                    printf("restarting]\n");
+                    g_thread_join(&threads[i]);
+                    g_thread_new(0,resolveClient,&clients[i]);
+                }    
+                else
+                {
+                    oldValues[i] = checkArray[i];
+                }
+            }   
+        }
+    }    
+}
+
 
 int main(int argc,char** argv)
 {
@@ -53,8 +89,12 @@ int main(int argc,char** argv)
 
     activeClient activeClients[100]; //array of active clients
     GMutex mutexes[100]; //array of mutexes(each client has its own mutex)
+    GThread threads[100]; //array used to store the thread of each client
+    int checkArray[100]; //array use by the watchdog to check on the threads
     int clientId = 1;
     g_mutex_init(&mutexes[0]);
+    if(fork() == 0)
+        watchDog(checkArray,threads,activeClients,&clientId);
     while(1)
     {
         GSocket* client = g_socket_accept(socket,0,0);
@@ -64,6 +104,10 @@ int main(int argc,char** argv)
         aC.socket = client;
         aC.activeClients = activeClients;
         aC.mutexes = mutexes;
+        aC.working = false;
+        aC.checkArray = checkArray;
+
+        checkArray[clientId] = -1;
 
         activeClients[clientId] = aC;
         clientId++;
@@ -72,9 +116,11 @@ int main(int argc,char** argv)
         printf("client %d\n",clientType);
         g_socket_send(client,&aC.id,sizeof(int),0,0);  //send the id to the client
         printf("socket in main: %d\n",client);
-        GThread* t1;
+        
+        GThread* t;
+        t = g_thread_new(0,resolveClient,&aC);
 
-        t1=g_thread_new(0,resolveClient,&aC);
+        threads[clientId-1] = *t;
     }
     g_mutex_clear(&mutexes[0]);
     return 0;

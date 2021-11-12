@@ -1,16 +1,44 @@
 #include "serverActions.h"
 
+int parseText(char* text)
+{
+    char id[10];
+    int index = 0;
+    bool found = false;
+    int len = strlen(text);
+    for(int i=0;i<len;i++)
+    {
+        if(text[i] == '!')
+        {
+            found = true;
+            text[i] = 0;
+            continue;
+        }
+        if(found == true)
+        {
+            id[index] = text[i];
+            index++;
+        }
+    }
+    int idInt = atoi(id);
+    return idInt;
+}
 
 void receiveText(activeClient* aC,int targetId)
 {
     activeClient* clients = aC->activeClients;
-    char text[1024];
+    char text[100];
+    printf("target socket: %d\n",clients[targetId].socket);
+    printf("receiver socket: %d\n",aC->socket);
     GMutex mtx = aC->mutexes[targetId];
-    g_mutex_lock(&mtx); //lock the mutex in order to stom other threads from interfering with the transfer
-        g_socket_send(&clients[targetId].socket,"send text",10,0,0);
-        g_socket_receive(&clients[targetId].socket,text,1024,0,0);
-    g_mutex_unlock(&mtx);
-        g_socket_send(&aC->socket,text,1024,0,0);
+        printf("sending\n");
+        g_socket_send(clients[targetId].socket,"send text",100,0,0);
+        printf("sent receive request to %d\n",targetId);
+        if(g_socket_receive(clients[targetId].socket,text,100,0,0) == -1)
+            printf("error while receiving\n");
+        printf("received text from target\n");
+        g_socket_send(aC->socket,text,100,0,0);
+        printf("sent\n");
 }
 
 

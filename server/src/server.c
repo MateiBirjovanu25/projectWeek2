@@ -13,6 +13,7 @@ void* resolveClient(void* a)
     {   
         printf("waiting for command\n");
         while(aC->working == true);
+        aC->working = true;
         g_socket_receive(aC->socket,command,100,0,0); // receive command
         printf("received command: %s\n",command);
         targetId = parseText(command);
@@ -21,7 +22,6 @@ void* resolveClient(void* a)
         if(strcmp(command,"receive text") == 0)
         {
             aC->checkArray[aC->id]++;
-            aC->working = true;
             printf("working: %d\n",aC->working);
             printf("received request\n");
             receiveText(aC,targetId);
@@ -40,8 +40,14 @@ void* resolveClient(void* a)
     return NULL;
 }
 
-void watchDog(int* checkArray, GThread* threads,activeClient* clients,int* clientId)
+void* watchDog(void* param)
 {
+    watchDogParam* wParam = (watchDogParam*) param;
+    int* clientId = wParam->clientId;
+    int* checkArray = wParam->checkArray;
+    GThread* threads = wParam->threads;
+    activeClient* clients = wParam->clients;
+
     int oldValues[100];
     for(int i=0;i<100;i++)
         oldValues[i]=-1;
@@ -54,7 +60,7 @@ void watchDog(int* checkArray, GThread* threads,activeClient* clients,int* clien
             {   
                 if(checkArray[i] == oldValues[i])
                 {
-                    printf("restarting]\n");
+                    printf("restarting\n");
                     g_thread_join(&threads[i]);
                     g_thread_new(0,resolveClient,&clients[i]);
                 }    
@@ -93,8 +99,14 @@ int main(int argc,char** argv)
     int checkArray[100]; //array use by the watchdog to check on the threads
     int clientId = 1;
     g_mutex_init(&mutexes[0]);
-    if(fork() == 0)
-        watchDog(checkArray,threads,activeClients,&clientId);
+
+    watchDogParam wParam;
+    wParam.checkArray = checkArray;
+    wParam.threads = threads;
+    wParam.clients = activeClients;
+    wParam.clientId = &clientId;
+    GThread* watchThread = g_thread_new(0,watchDog,&wParam);
+
     while(1)
     {
         GSocket* client = g_socket_accept(socket,0,0);

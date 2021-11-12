@@ -9,6 +9,15 @@ typedef struct
     int* checkArray;
 }activeClient;
 
+
+typedef struct
+{
+    int* checkArray;
+    GThread* threads;
+    activeClient* clients;
+    int* clientId;
+}watchDogParam;
+
 int parseText(char*);
 void receiveText(activeClient*,int);
 void dbTest();

@@ -1,5 +1,8 @@
 #include "client_actions.h"
 
+#define RECEIVE_TEXT 1
+#define RECEIVE_SCRIPT 2
+
 GMutex *mtx;
 
 void* command_menu(void* arg){
@@ -14,15 +17,15 @@ void* command_menu(void* arg){
        
         printf("Enter command number:\n");
         printf("1.receive from clientId (you have to insert it) \n");
-        //printf("2.send to client_id\n");
-        printf("3.receive script client_id");
+        printf("2.receive script client_id\n");
       
         scanf("%d %d", &command_number, &param2);
 
         g_mutex_lock(&mtx); 
+
         switch (command_number)
         {
-            case 1:
+            case RECEIVE_TEXT:
                 printf("You will receive the file soon\n");
                 char text[20]="";
                 sprintf(text, "%d", param2); 
@@ -33,13 +36,7 @@ void* command_menu(void* arg){
                 receive_text(socket);
                 break;
             
-            /*case 2:
-                printf("The file will be sent soon\n");
-                g_socket_send(socket,"send text",100,0,0);
-                send_text(socket);
-                break;
-            */
-            case 3:
+            case RECEIVE_SCRIPT:
                 printf("You will receive the script soon");
                 char text3[20]="";
                 sprintf(text3, "%d", param2); 
@@ -62,8 +59,7 @@ void* command_menu(void* arg){
 void* respond(void* arg){
 
     GSocket* socket = (GSocket*) arg;
-
-    
+   
     while(1){
 
         g_mutex_lock(&mtx);
@@ -77,9 +73,8 @@ void* respond(void* arg){
             printf("send\n");
             send_text(socket);
         }
-        g_mutex_unlock(&mtx);   
-        
 
+        g_mutex_unlock(&mtx);   
     }
 
 }
@@ -110,7 +105,6 @@ int main(int argc,char** argv)
     int client_id;
     g_socket_receive(socket, (gchar*)&client_id, sizeof(int), 0,0);
     printf("I am client number %d\n", client_id);
-
 
     g_mutex_init(&mtx);
     GThread* tid1;

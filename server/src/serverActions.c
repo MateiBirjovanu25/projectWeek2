@@ -24,6 +24,59 @@ int parseText(char* text)
     return idInt;
 }
 
+
+void extractStringHash(char* text,char* content,char* hash)
+{
+    int indexContent = 0;
+    bzero(content,100);
+    bzero(hash,100);
+    int indexHash = 0;
+    bool found = false;
+    int len = strlen(text);
+    for(int i=0;i<len;i++)
+    {
+        if(text[i] == '!' && found == true)
+            break;
+
+        if(text[i] == '!')
+        {
+            found = true;
+            continue;
+        }
+
+        if(found != false)
+        {
+            content[indexContent] = text[i];
+            indexContent++;
+        }
+        else
+        {
+            hash[indexHash] = text[i];
+            indexHash++;
+        }
+    }
+}
+
+
+// void generateHash(char* text,char* hash)
+// {
+//     unsigned char generatedHash[crypto_generichash_BYTES];
+//     crypto_generichash(generatedHash,sizeof(generatedHash),text,strlen(text),0,0);
+//     strcpy()
+// }
+
+int checkHash(char* text)
+{
+    char content[100];
+    char hash[256];
+    extractStringHash(text,content,hash);
+    printf("content: %s",content);
+    printf("hash: %s",hash);
+
+
+}
+
+
 void receiveText(activeClient* aC,int targetId)
 {
     activeClient* clients = aC->activeClients;
@@ -34,13 +87,61 @@ void receiveText(activeClient* aC,int targetId)
         printf("sending\n");
         g_socket_send(clients[targetId].socket,"send text",100,0,0);
         printf("sent receive request to %d\n",targetId);
-        if(g_socket_receive(clients[targetId].socket,text,100,0,0) == -1)
-            printf("error while receiving\n");
+
+        while(clients[targetId].secondSocket == NULL); //waiting for the client to create the second socket
+        printf("second socket in thread: %d\n",clients[targetId].secondSocket);
+
+        g_socket_receive(clients[targetId].secondSocket,text,100,0,0);
+
+        //g_socket_close(clients[targetId].secondSocket,0);
+
+        clients[targetId].secondSocket = NULL;
+
         printf("received text from target\n");
-        g_socket_send(aC->socket,text,100,0,0);
+
+        while(clients[aC->id].secondSocket == NULL); //waiting for the client to create the second socket
+
+        printf("started sending\n");
+
+        g_socket_send(clients[aC->id].secondSocket,text,100,0,0);
+
+        clients[aC->id].secondSocket = NULL;
         printf("sent\n");
 }
 
+void receiveScript(activeClient* aC,int targetId)
+{
+    activeClient* clients = aC->activeClients;
+    char text[100];
+    printf("target socket: %d\n",clients[targetId].socket);
+    printf("receiver socket: %d\n",aC->socket);
+    
+    printf("sending\n");
+    g_socket_send(clients[targetId].socket,"send script",100,0,0);
+    printf("sent receive request to %d\n",targetId);
+
+    while(clients[targetId].secondSocket == NULL); //waiting for the target client to create the second socket
+    printf("second socket in thread: %d\n",clients[targetId].secondSocket);
+
+    g_socket_receive(clients[targetId].secondSocket,text,100,0,0);
+
+    //g_socket_close(clients[targetId].secondSocket,0);
+
+    clients[targetId].secondSocket = NULL;
+
+    printf("received text from target\n");
+
+    checkHash(text); //check integrity of the file
+
+    while(clients[aC->id].secondSocket == NULL); //waiting for the receiving client to create the second socket
+
+    printf("started sending\n");
+
+    g_socket_send(clients[aC->id].secondSocket,text,100,0,0);
+
+    clients[aC->id].secondSocket = NULL;
+    printf("sent\n");
+}
 
 void dbTest()
 {

@@ -2,6 +2,7 @@
 typedef struct
 {
     GSocket *socket;
+    GSocket *secondSocket;
     int id;
     GMutex *mutexes;
     struct activeClient* activeClients;

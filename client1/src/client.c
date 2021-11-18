@@ -1,10 +1,9 @@
-#include "../include.h"
+#include "client_actions.h"
 
 GMutex mtx;
 
 void* command_menu(void* arg){
-
-    GSocket* socket = (GSocket*) arg;
+    clientParam* cp = (clientParam*) arg;
 
       
     while(1){
@@ -17,8 +16,8 @@ void* command_menu(void* arg){
  
         printf("Enter command number:\n");
         printf("1.receive from clientId (you have to insert it) \n");
-        printf("2.send to client_id\n");
         printf("3.receive script client_id\n");
+        printf("4.exit\n");
         
         
         gets(command_number);
@@ -27,7 +26,6 @@ void* command_menu(void* arg){
         {
             printf("ok\n");
         }
-        g_mutex_lock(&mtx);
         printf("command: %d\n",param1);
         printf("user id: %d\n",param2);
         GError* gerror=NULL;
@@ -40,46 +38,45 @@ void* command_menu(void* arg){
                 char idText[10];
                 sprintf(idText,"!%d",param2);
                 strcat(commandWithId,idText);
-                if(g_socket_send(socket,commandWithId,100,0,gerror) == -1)
+                if(g_socket_send(cp->socket,commandWithId,100,0,gerror) == -1)
                     printf("error");
                 printf("command sent\n");
-                receive_text(socket);
+                receive_text(cp);
                 break;
             
             case 3:
-                printf("You will receive the script soon");
-                g_socket_send(socket, "receive text",100,0,0);
-                g_socket_send(socket, (gchar*)&param2, sizeof(int), 0,0);
-                receive_script(socket);
+                printf("You will receive the script soon\n");
+                g_socket_send(cp->socket, "receive text",100,0,0);
+                g_socket_send(cp->socket, (gchar*)&param2, sizeof(int), 0,0);
+                receive_script(cp->socket);
                 break;
+            
+            case 4:
+                g_socket_send(cp->socket, "exit",100,0,0);
+                exit(1);
             
             default:
                 printf("Can't solve the request\n");
                 break;
         } 
-        g_mutex_unlock(&mtx); 
     } 
     
 }
 
 void* respond(void* arg){
+    clientParam* cp = (clientParam*) arg;
 
-    GSocket* socket = (GSocket*) arg;
     while(1){
         char command[100];
         int debug;
         bzero(command,100);
-        g_socket_receive(socket,command,100,0,0);
-        g_mutex_lock(&mtx);
-        printf("received: %s\n",command);
+        g_socket_receive(cp->socket,command,100,0,0);
         printf("received:\n %s\n",command);
-        printf("from %d\n",socket);
+        printf("from %d\n",cp->socket);
         if(strcmp(command,"send text")==0)  
         {
-            send_text(socket);
-            printf("sent to %d\n",socket);
-        }
-        g_mutex_unlock(&mtx);   
+            send_text(cp);
+        }   
     }
 
 }
@@ -105,10 +102,12 @@ int main(int argc,char** argv)
     printf("Connected to server\n");
 
     int clientType = 1; 
-    g_socket_send(socket, &clientType, 4, 0,0);
+    g_socket_send(socket, &clientType, 4, 0,0);//send the type of the client
+
+    g_socket_send(socket,"active",100,0,0); //send the part of the client
 
     int client_id;
-    g_socket_receive(socket, (gchar*)&client_id, sizeof(int), 0,0);
+    g_socket_receive(socket, (gchar*)&client_id, sizeof(int), 0,0);//receive the client id
     printf("I am client number %d\n", client_id);
 
 
@@ -116,8 +115,13 @@ int main(int argc,char** argv)
     GThread* tid1;
     GThread* tid2;
 
-    tid1 = g_thread_new(0,command_menu,socket);
-    tid2 = g_thread_new(0,respond,socket);
+    clientParam cP;
+    cP.socket = socket;
+    cP.address = address;
+    cP.clientId = client_id;
+
+    tid1 = g_thread_new(0,command_menu,&cP);
+    tid2 = g_thread_new(0,respond,&cP);
 
     g_thread_join(tid1);
     g_thread_join(tid2);         

@@ -37,7 +37,7 @@ void send_text(clientParam* cp){
     system("clear");
     printf("Enter command number:\n");
     printf("1.receive from clientId (you have to insert it) \n");
-    printf("3.receive script client_id\n");
+    printf("2.receive script client_id\n");
 
     //g_socket_close(secondSocket,0);
 

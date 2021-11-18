@@ -16,8 +16,8 @@ void* command_menu(void* arg){
  
         printf("Enter command number:\n");
         printf("1.receive from clientId (you have to insert it) \n");
-        printf("3.receive script client_id\n");
-        printf("4.exit\n");
+        printf("2.receive script client_id\n");
+        printf("3.exit\n");
         
         
         gets(command_number);
@@ -44,14 +44,14 @@ void* command_menu(void* arg){
                 receive_text(cp);
                 break;
             
-            case 3:
+            case 2:
                 printf("You will receive the script soon\n");
                 g_socket_send(cp->socket, "receive text",100,0,0);
                 g_socket_send(cp->socket, (gchar*)&param2, sizeof(int), 0,0);
                 receive_script(cp->socket);
                 break;
             
-            case 4:
+            case 3:
                 g_socket_send(cp->socket, "exit",100,0,0);
                 exit(1);
             

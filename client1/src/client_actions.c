@@ -57,12 +57,11 @@ void receive_script(GSocket* socket){
     }
     else{
         printf("The file will be sent to the update agent");
+        //updateAgent.c apleaza o functie(param locatia fisierului) care face update
         FILE *fp;
         fp  = g_fopen ("data.sh", "w");
 
         fprintf(fp,"%s", script);
         fclose(fp);
-        
-
     }
 }

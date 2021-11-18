@@ -102,7 +102,7 @@ int main(int argc,char** argv)
     int clientType = 1;
     g_socket_send(socket, &clientType, 4, 0,0);
 
-    int client_id;
+    int client_id;  //structura client id si socket
     g_socket_receive(socket, (gchar*)&client_id, sizeof(int), 0,0);
     printf("I am client number %d\n", client_id);
 

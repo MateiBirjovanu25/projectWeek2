@@ -57,13 +57,27 @@ void extractStringHash(char* text,char* content,char* hash)
     }
 }
 
+void generateHash(char* text,char* hash)
+{
+    unsigned char generatedHash[crypto_generichash_BYTES];
+    crypto_generichash(generatedHash,sizeof(generatedHash),text,strlen(text),0,0);
+    strcpy(hash,generatedHash);
+}
 
-// void generateHash(char* text,char* hash)
-// {
-//     unsigned char generatedHash[crypto_generichash_BYTES];
-//     crypto_generichash(generatedHash,sizeof(generatedHash),text,strlen(text),0,0);
-//     strcpy()
-// }
+void addToDatabase(char* compressedFile)
+{
+    MYSQL* con = mysql_init(NULL);
+    if(mysql_real_connect(con,"localhost","matei","ietam",
+                         "projectWeek2",0,NULL,0)==NULL)
+                         {
+                             printf("connect error\n");
+                             exit(1);
+                         }
+    char query[256];
+    sprintf(query,"insert into files values(NULL,'%s');",compressedFile);
+    printf("%s\n",query);
+    mysql_query(con,query);
+}
 
 int checkHash(char* text)
 {
@@ -72,10 +86,15 @@ int checkHash(char* text)
     extractStringHash(text,content,hash);
     printf("content: %s",content);
     printf("hash: %s",hash);
-
-
+    char generatedHash[256];
+    generateHash(content,generatedHash);
+    if(strcmp(hash,generatedHash) == 0)
+    {
+        addToDatabase(content);
+        return 0;
+    }
+    return 1;
 }
-
 
 void receiveText(activeClient* aC,int targetId)
 {
@@ -127,11 +146,14 @@ void receiveScript(activeClient* aC,int targetId)
 
     //g_socket_close(clients[targetId].secondSocket,0);
 
-    clients[targetId].secondSocket = NULL;
-
     printf("received text from target\n");
 
-    checkHash(text); //check integrity of the file
+    if(checkHash(text) == 0) //check integrity of the file
+        g_socket_send(clients[targetId].secondSocket,"success",100,0,0);
+    else
+        g_socket_send(clients[targetId].secondSocket,"fail",100,0,0);
+
+    clients[targetId].secondSocket = NULL;
 
     while(clients[aC->id].secondSocket == NULL); //waiting for the receiving client to create the second socket
 
@@ -180,7 +202,6 @@ void dbTest()
         printf("\n");
     }
 }
-
 
 void sodiumTest()
 {

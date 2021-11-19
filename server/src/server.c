@@ -23,7 +23,12 @@ void* resolveClient(void* a)
             printf("received request\n");
             receiveText(aC,targetId);
         }
-        
+        else if(strcmp(command, "receive script") == 0)
+        {
+             aC->checkArray[aC->id]++;
+            printf("received request\n");
+            receiveScript(aC,targetId);
+        }
         else if(strcmp(command,"exit") == 0)
         {
             return NULL;
@@ -74,6 +79,7 @@ void* watchDog(void* param)
 
 int main(int argc,char** argv)
 {
+    addToDatabase("caine");
     int port = atoi(argv[1]);
     struct sockaddr_in server;
     server.sin_port=htons(port);

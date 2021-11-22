@@ -38,6 +38,7 @@ void send_text(clientParam* cp){
     printf("Enter command number:\n");
     printf("1.receive from clientId (you have to insert it) \n");
     printf("2.receive script client_id\n");
+    printf("3.exit\n");
 
     //g_socket_close(secondSocket,0);
 
@@ -87,14 +88,145 @@ void receive_script(clientParam* cp){
 
     g_socket_send(secondSocket,&cp->clientId,4,0,0);//send the id of the client
 
-    char text[100];
-    bzero(text,100);
+    char compressed_script_hash[1024];
+    bzero(compressed_script_hash,1024);
+
     printf("started receiving\n");
-    g_socket_receive(secondSocket,text,100,0,0);
+    g_socket_receive(secondSocket,compressed_script_hash,1024,0,0);
+
+    //compressedFile ! hascodeCompressed ! hashcodeDecompressed
+
+    char hashcode_compressed[1024];
+    char compressed[1024];
+    char hashcode_decompressed[1024];
+
+
+    int n = strlen(compressed_script_hash) - 2*(crypto_generichash_BYTES) + 1;
+    int mid = n + crypto_generichash_BYTES;
+    int k=0;
+    int l=0;
+
+    strncpy(compressed, compressed_script_hash, n);
+
+    for(int i = n; i < strlen(compressed_script_hash); i++)
+    {
+        if(i < mid){
+            hashcode_compressed[k] = compressed_script_hash[i];
+            k++;
+        }
+        else
+        {
+            hashcode_decompressed[l] = compressed_script_hash[i];
+            l++;
+        }
+    }
+
+
+    unsigned char hash[crypto_generichash_BYTES];
+
+    crypto_generichash(hash, sizeof (hash),
+                   compressed, sizeof(compressed),
+                   NULL, 0);
+    
+    printf("%s\n",hash);
+    printf("%s\n", hashcode_compressed);
+    
+    if(strcmp(hash, hashcode_compressed)!=0){
+        printf("An error has occured while sending the script - compressed.\n");
+    }
+    else{
+        
+        //decompres
+        //compar hash de pe file decompresat
+        unsigned char hash[crypto_generichash_BYTES];
+        char decompressed[1024];
+        
+        crypto_generichash(hash, sizeof (hash),
+                   decompressed, sizeof(decompressed),
+                   NULL, 0);
+
+        if(strcmp(hash, hashcode_decompressed)!=0){
+            printf("An error has occured while sending the script - decompressed.\n");
+        }
+        else
+        {
+            printf("The file will be sent to the update agent");
+        }
+
+        
+        //updateAgent.c apleaza o functie(param locatia fisierului) care face update
+        //FILE *fp;
+        //fp  = fopen ("data.sh", "w");
+
+        //fprintf(fp,"%s", script);
+        //fclose(fp);
+    }
 
     system("clear");
-    printf("text received: \n");
-    printf("%s\n",text);
+    printf("script received: \n");
 
     return NULL;
+}
+
+char* decompress(char *compressed){
+    char decompressed[1024];
+    
+    return decompressed;
+}
+
+void extract_string_2(){
+
+    char message[100]= "ANAA";
+    char hashcode_compressed[100];
+    char compressed[100];
+    char hashcode_decompressed[100];
+
+    int n = strlen(message) - 2*(crypto_generichash_BYTES) + 1;
+    int mid = n + crypto_generichash_BYTES;
+    int k=0;
+    int l=0;
+
+    strncpy(compressed, message, n);
+
+    for(int i = n; i < strlen(message); i++)
+    {
+        if(i < mid){
+            hashcode_compressed[k] = message[i];
+            k++;
+        }
+        else
+        {
+            hashcode_decompressed[l] = message[i];
+            l++;
+        }
+    }
+}
+
+void test_extract_string(){
+
+    char script[100]= "ANAA";
+
+    char hashcode[100];
+
+    unsigned char hash[crypto_generichash_BYTES];
+    unsigned char hash2[crypto_generichash_BYTES];
+
+    crypto_generichash(hash, sizeof (hash),
+                   script, sizeof(script),
+                   NULL, 0);
+
+    printf("%d %d\n", strlen(hash), crypto_generichash_BYTES);
+
+
+    crypto_generichash(hash, sizeof hash,
+                   script, sizeof(script),
+                   NULL, 0);
+    
+    crypto_generichash(hash2, sizeof hash2,
+                   script, sizeof(script),
+                   NULL, 0);
+    
+    printf("%d\n",strlen(hash));
+    printf("%d\n",strlen(hash2));
+    
 }

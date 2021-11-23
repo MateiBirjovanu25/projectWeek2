@@ -13,4 +13,5 @@ int  checkHash(char*);
 void extractStingHash(char*,char*,char*);
 void test_extract_string();
 //void extract_string_hash(char*, char*, char*, char*);
-char* decompress(char *);
+void decompress(char*,char *);
+void test_compressed();

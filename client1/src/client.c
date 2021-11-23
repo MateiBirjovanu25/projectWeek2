@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 
     printf("Connected to server\n");
 
-    //test_extract_string();
+    test_extract_string();
 
     int clientType = 1;
     g_socket_send(socket, &clientType, 4, 0, 0); //send the type of the client

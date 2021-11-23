@@ -1,4 +1,5 @@
 #include "client_actions.h"
+#include "update_agent.h"
 
 void send_text(clientParam* cp){
 
@@ -94,7 +95,7 @@ void receive_script(clientParam* cp){
     printf("started receiving\n");
     g_socket_receive(secondSocket,compressed_script_hash,1024,0,0);
 
-    //compressedFile ! hascodeCompressed ! hashcodeDecompressed
+    //compressedFile hascodeCompressed hashcodeDecompressed
 
     char hashcode_compressed[1024];
     char compressed[1024];
@@ -207,6 +208,7 @@ void test_extract_string(){
     char script[100]= "ANAA";
 
     char hashcode[100];
+    //update(script);
 
     unsigned char hash[crypto_generichash_BYTES];
     unsigned char hash2[crypto_generichash_BYTES];
@@ -215,7 +217,7 @@ void test_extract_string(){
                    script, sizeof(script),
                    NULL, 0);
 
-    printf("%d %d\n", strlen(hash), crypto_generichash_BYTES);
+    printf("%s %d %d\n", hash, strlen(hash), crypto_generichash_BYTES);
 
 
     crypto_generichash(hash, sizeof hash,

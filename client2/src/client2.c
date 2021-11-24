@@ -106,7 +106,21 @@ int main(int argc,char** argv)
     g_socket_receive(socket, (gchar*)&clientType, sizeof(int), 0,0);
     printf("I am client nr %d\n", clientType);
 
+    printf("Script sent to the server...\n");
+    char scriptName[100] = "misc/script.sh";
+    int fd = open(scriptName,O_RDONLY);
+    char originalBuff[1024],compressedBuff[1024], originalHash[256],compressedHash[256];
+    bzero(originalBuff, 1024);
+    if(fd < 0)
+    {
+        printf("Wrong path or script doesn t exist!\n");
+    }
+    else
+        read(fd, originalBuff, 1024);
+
     
+
+
     g_mutex_init(&mutex);
     GThread* t1;
     GThread* t2;

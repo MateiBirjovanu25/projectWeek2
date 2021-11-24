@@ -180,7 +180,7 @@ void decompress(char* decompressed, char *compressed){
     infstream.zfree = Z_NULL;
     infstream.opaque = Z_NULL;
     // setup "b" as the input and "c" as the compressed output
-    infstream.avail_in = (uInt)((char*)(Bytef *)compressed - *compressed); // size of input
+    infstream.avail_in = (uInt)(((char*)(Bytef *)compressed) - compressed); // size of input
     infstream.next_in = (Bytef *)compressed; // input char array
     infstream.avail_out = (uInt)sizeof(decompressed); // size of output
     infstream.next_out = (Bytef *)(decompressed); // output char array
@@ -205,7 +205,6 @@ void test_compressed(){
     char b[1024];
 
     
-     
 
     printf("Uncompressed size is: %lu\n", strlen(a));
     printf("Uncompressed string is: %s\n", a);
@@ -260,7 +259,7 @@ void test_compressed(){
 
     // placeholder for the UNcompressed (inflated) version of "b"
     char c[1024];
-    decompress(&c,&b);
+    decompress(c,b);
      
     printf("Uncompressed size is: %lu\n", strlen(c));
     printf("Uncompressed string is: %s\n", c);
@@ -307,23 +306,16 @@ void test_extract_string(){
     char hashcode[100];
     //update(script);
 
-    unsigned char hash[crypto_generichash_BYTES];
-    unsigned char hash2[crypto_generichash_BYTES];
+    unsigned char hash[crypto_hash_sha256_BYTES];
+    unsigned char hash2[crypto_hash_sha256_BYTES];
 
-    crypto_generichash(hash, sizeof (hash),
-                   script, sizeof(script),
-                   NULL, 0);
+    crypto_hash_sha256(hash, script, sizeof(script));
 
-    printf("%s %d %d\n", hash, strlen(hash), crypto_generichash_BYTES);
+    printf("%s %d\n", hash, strlen(hash));
 
 
-    crypto_generichash(hash, sizeof hash,
-                   script, sizeof(script),
-                   NULL, 0);
-    
-    crypto_generichash(hash2, sizeof hash2,
-                   script, sizeof(script),
-                   NULL, 0);
+    crypto_hash_sha256(hash2, script, sizeof(script));
+
     
     printf("%d\n",strlen(hash));
     printf("%d\n",strlen(hash2));

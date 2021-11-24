@@ -10,6 +10,6 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <arpa/inet.h>
-#include <mysql.h>
+//#include <mysql.h>
 #include <sodium.h>
 #include <zlib.h>

@@ -1,5 +1,6 @@
 #include "client2_func.h"
 #include "../include.h"
+
 int clientID;
 GMutex* mutex;
 
@@ -21,7 +22,7 @@ void* commands(void* arg)
     command = sscanf(commandNr, "%d %d", &param1, &param2);
     GError* gerror=NULL;
     
-    g_mutex_lock(&mutex); 
+    //g_mutex_lock(&mutex); 
 
     switch (param1){
         case 1:
@@ -47,7 +48,7 @@ void* commands(void* arg)
             printf("Command not found!\n");
             break; }
     }
-    g_mutex_unlock(&mutex); 
+    //g_mutex_unlock(&mutex); 
 }
 
 void* respond(void* arg)
@@ -55,7 +56,7 @@ void* respond(void* arg)
     clientParam* cp = (clientParam*) arg;
     while(1)
     {
-        g_mutex_lock(&mutex);
+        //g_mutex_lock(&mutex);
         
         char cmd[100];
         bzero(cmd, 20);
@@ -67,7 +68,7 @@ void* respond(void* arg)
             if(strcmp(cmd, "send script") == 0)
                 sendScript(cp);
         
-        g_mutex_unlock(&mutex);
+        //g_mutex_unlock(&mutex);
     }
 }
 

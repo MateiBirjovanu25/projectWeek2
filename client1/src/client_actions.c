@@ -94,6 +94,7 @@ void receive_script(clientParam* cp){
 
     printf("started receiving\n");
     g_socket_receive(secondSocket,compressed_script_hash,1024,0,0);
+    printf("\n\n am primit : %s\n\n\n",compressed_script_hash);
 
     //compressedFile hascodeCompressed hashcodeDecompressed
 
@@ -123,12 +124,13 @@ void receive_script(clientParam* cp){
     }*/
 
 
-    //unsigned char hash[crypto_hash_sha256_BYTES];
-    unsigned char hash[crypto_generichash_BYTES];
+    unsigned char hash[crypto_hash_sha256_BYTES];
+    //unsigned char hash[crypto_generichash_BYTES];
 
-    //crypto_hash_sha256(hash, compressed, sizeof(compressed));
-    crypto_generichash(hash,sizeof(hash),compressed,sizeof(compressed),0,0);
+    crypto_hash_sha256(hash, compressed, sizeof(compressed));
+    //crypto_generichash(hash,sizeof(hash),compressed,sizeof(compressed),0,0);
     
+    printf("compressed; %s\n",compressed);
     printf("%s\n",hash);
     printf("%s\n", hashcode_compressed);
     
@@ -284,7 +286,7 @@ void extract_string_3(char* source, char* a, char* b, char* c){
    int i = 0;
    /* walk through other tokens */
    while( token != NULL ) {
-      printf( " %s\n", token );
+      //printf( " %s\n", token );
       if(i==0){
           strcpy(a, token);
           i++;

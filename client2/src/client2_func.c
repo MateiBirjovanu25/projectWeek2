@@ -87,8 +87,8 @@ void sendScript(clientParam* cp)
 
 void generateHash(char* text,char* hash)
 {
-    unsigned char generatedHash[crypto_generichash_BYTES];
-    crypto_generichash(generatedHash,sizeof(generatedHash),text,strlen(text),0,0);
+    unsigned char generatedHash[crypto_hash_sha256_BYTES];
+    crypto_hash_sha256(generatedHash,text,sizeof(text));
     strcpy(hash,generatedHash);
 }
 

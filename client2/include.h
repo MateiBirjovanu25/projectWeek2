@@ -12,3 +12,4 @@
 #include <arpa/inet.h>
 #include <mysql.h>
 #include <sodium.h>
+#include <zlib.h>

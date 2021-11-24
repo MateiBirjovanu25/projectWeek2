@@ -1,5 +1,13 @@
 #include "../include.h"
 
-void sendText(GSocket* sockfd);
-void receiveText(GSocket* sockfd);
-void sendScript(GSocket* sockfd);
+typedef struct{
+    GSocket* socket;
+    GSocketAddress* addr;
+    int clientID;
+}clientParam;
+
+void sendText(clientParam*);
+void receiveText(clientParam*);
+void sendScript(clientParam*);
+void generateHash(char*,char*);
+void compression(unsigned char*,const char*);

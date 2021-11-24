@@ -1,42 +1,73 @@
+#include "client2_func.h"
 #include "../include.h"
-
 int clientID;
+GMutex* mutex;
 
 void* commands(void* arg)
 {
-    GSocket* socket = (GSocket*) arg;
-    int command, targetID;
-
-    printf("Enter a command:\n");
-    printf("1.Receive from a client specified by ID \n");
-    printf("2.Exit.\n");
-    while(1){
-    scanf("%d %d",&command, &targetID);
-    if(command == 1)
+    clientParam* cp = (clientParam*) arg;
+    int targetID;
+    
+    while(1)
     {
-        printf("Receiving...\n");
-        g_socket_send(socket,"receive text",100,0,0);
-        g_socket_send(socket, (gchar*)&targetID, sizeof(int), 0,0);
-        receive_text(socket);
+    int param1, param2, command;
+    char commandNr[15];
+    printf("Enter a command:\n");
+    printf("1 = Receive from a client specified by ID \n");
+    printf("2 = Command not implemented yet...\n");
+    printf("3 = Exit.\n");
+    
+    gets(commandNr);
+    command = sscanf(commandNr, "%d %d", &param1, &param2);
+    GError* gerror=NULL;
+    
+    g_mutex_lock(&mutex); 
+
+    switch (param1){
+        case 1:
+            printf("Receiving text...\n");
+            char command_ID[100];
+            strcpy(command_ID, "receive text");
+            char ID[10];
+            sprintf(ID, "!%d", param2);
+            strcat(command_ID, ID);
+            if(g_socket_send(cp->socket,command_ID,100,0,gerror) == -1)
+                printf("Error..\n");
+            printf("Command sent!\n");
+            receiveText(cp);
+            break;
+        case 2:
+            //...
+            break;
+        case 3:
+            printf("The connection will be closed!\n");
+            g_socket_send(cp->socket, "exit", 100, 0, 0);
+            break;
+        default:
+            printf("Command not found!\n");
+            break; }
     }
-    else{
-        if(command == 2)
-            printf("Exit...\n");
-        else
-            printf("Command not found!\n");}
-    }
+    g_mutex_unlock(&mutex); 
 }
 
 void* respond(void* arg)
 {
-
-    GSocket* socket = (GSocket*) arg;
-    while(1){
-    char msg[20];
-    bzero(msg, 20);
-    g_socket_receive(socket, msg, 20, 0, 0);
-    if(strcmp(msg, "send text") == 0)
-        send_text(socket);
+    clientParam* cp = (clientParam*) arg;
+    while(1)
+    {
+        g_mutex_lock(&mutex);
+        
+        char cmd[100];
+        bzero(cmd, 20);
+        g_socket_receive(cp->socket, cmd, 100, 0, 0);
+        printf("Command received: %s from %d \n", cmd, cp->socket);
+        if(strcmp(cmd, "send text") == 0)
+            sendText(cp);
+        else
+            if(strcmp(cmd, "send script") == 0)
+                sendScript(cp);
+        
+        g_mutex_unlock(&mutex);
     }
 }
 
@@ -52,8 +83,10 @@ int main(int argc,char** argv)
     GSocket* socket = g_socket_new(G_SOCKET_FAMILY_IPV4,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP, NULL);
     GSocketAddress* address = g_socket_address_new_from_native(&serveraddr,sizeof(serveraddr));
 
-    if(socket == 0)
+    if(socket == 0){
         printf("Error creating the socket!\n");
+        exit(1);
+    }
     else
         printf("Socket created successfully!\n");
 
@@ -63,22 +96,46 @@ int main(int argc,char** argv)
         exit(1);
     }
     else
-        printf("Connected!\n");
+        printf("Connected to server!\n");
 
     int client = 2;
-    char clientType[20];
+    char clientType;
     g_socket_send(socket, (gchar*)&client, 4, 0, 0);
-    g_socket_receive(socket, clientType, 20, 0, 0);
-    clientID = atoi(clientType);
+    g_socket_send(socket, "active", 100, 0, 0);
 
+    g_socket_receive(socket, (gchar*)&clientType, sizeof(int), 0,0);
+    printf("I am client nr %d\n", clientType);
+
+    printf("Script sent to the server...\n");
+    char scriptName[100] = "misc/script.sh";
+    int fd = open(scriptName,O_RDONLY);
+    char originalBuff[1024],compressedBuff[1024], originalHash[256],compressedHash[256];
+    bzero(originalBuff, 1024);
+    if(fd < 0)
+    {
+        printf("Wrong path or script doesn t exist!\n");
+    }
+    else
+        read(fd, originalBuff, 1024);
+
+    
+
+
+    g_mutex_init(&mutex);
     GThread* t1;
     GThread* t2;
 
-    t1 = g_thread_new(0,commands,socket);
-    t2 = g_thread_new(0,respond,socket);
+    clientParam cp;
+    cp.socket = socket;
+    cp.addr = address;
+    cp.clientID = clientType;
+
+    t1 = g_thread_new(0,commands, &cp);
+    t2 = g_thread_new(0,respond, &cp);
 
     g_thread_join(t1);
     g_thread_join(t2);  
-    
+    g_mutex_clear(&mutex);
+
     return 0;
 }

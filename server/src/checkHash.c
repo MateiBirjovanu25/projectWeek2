@@ -3,8 +3,8 @@
 void extractStringHash(char* text,char* content,char* hash)
 {
     int indexContent = 0;
-    bzero(content,100);
-    bzero(hash,100);
+    bzero(content,1024);
+    bzero(hash,1024);
     int indexHash = 0;
     bool found = false;
     int len = strlen(text);
@@ -19,7 +19,7 @@ void extractStringHash(char* text,char* content,char* hash)
             continue;
         }
 
-        if(found != false)
+        if(found == false)
         {
             content[indexContent] = text[i];
             indexContent++;
@@ -41,12 +41,12 @@ void generateHash(char* text,char* hash)
 
 int checkHash(char* text)
 {
-    char content[100];
-    char hash[256];
+    char content[1024];
+    char hash[1024];
     extractStringHash(text,content,hash);
-    printf("content: %s",content);
-    printf("hash: %s",hash);
-    char generatedHash[256];
+    printf("content: %s\n",content);
+    printf("hash: %s\n",hash);
+    char generatedHash[1024];
     generateHash(content,generatedHash);
     if(strcmp(hash,generatedHash) == 0)
     {

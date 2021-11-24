@@ -81,6 +81,7 @@ void sendScript(clientParam* cp)
     g_socket_send(secondSocket, &clientType, 4, 0, 0);
     g_socket_send(secondSocket, "passive", 100, 0, 0);
     g_socket_send(secondSocket, &cp->clientID, 4, 0, 0);
+    printf("buffer: %s\n",compressedBuff);
     g_socket_send(secondSocket, compressedBuff, 1024, 0, 0);
 }
 

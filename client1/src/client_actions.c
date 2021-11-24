@@ -166,7 +166,7 @@ void receive_script(clientParam* cp){
 
     }
 
-    system("clear");
+    //system("clear");
     printf("script received: \n");
 
     return NULL;
@@ -190,7 +190,7 @@ void decompress(int x, char* decompressed, char *compressed){
     // the actual DE-compression work.
     inflateInit(&infstream);
     inflate(&infstream, Z_NO_FLUSH);
-    inflateEnd(&infstream);
+    inflateEnd(&infstream); 
      
     printf("Uncompressed size is: %d\n", strlen(decompressed));
     printf("Uncompressed string is: %s\n", decompressed);

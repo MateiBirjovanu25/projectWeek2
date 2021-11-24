@@ -73,7 +73,9 @@ void sendScript(clientParam* cp)
     generateHash(originalBuff, originalHash);
     compressTxt(originalBuff,compressedBuff);
     generateHash(compressedBuff, compressedHash);
+    strcat(compressedBuff, "!");
     strcat(compressedBuff, compressedHash);
+    strcat(compressedBuff, "!");
     strcat(compressedBuff, originalHash);
 
     g_socket_send(secondSocket, &clientType, 4, 0, 0);

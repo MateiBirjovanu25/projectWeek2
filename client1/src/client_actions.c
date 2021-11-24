@@ -101,8 +101,8 @@ void receive_script(clientParam* cp){
     char compressed[1024];
     char hashcode_decompressed[1024];
 
-
-    int n = strlen(compressed_script_hash) - 2*(crypto_generichash_BYTES) + 1;
+    extract_string_3(compressed_script_hash, compressed, hashcode_compressed, hashcode_decompressed);
+    /*int n = strlen(compressed_script_hash) - 2*(crypto_generichash_BYTES) + 1;
     int mid = n + crypto_generichash_BYTES;
     int k=0;
     int l=0;
@@ -120,14 +120,14 @@ void receive_script(clientParam* cp){
             hashcode_decompressed[l] = compressed_script_hash[i];
             l++;
         }
-    }
+    }*/
 
 
+    //unsigned char hash[crypto_hash_sha256_BYTES];
     unsigned char hash[crypto_generichash_BYTES];
 
-    crypto_generichash(hash, sizeof (hash),
-                   compressed, sizeof(compressed),
-                   NULL, 0);
+    //crypto_hash_sha256(hash, compressed, sizeof(compressed));
+    crypto_generichash(hash,sizeof(hash),compressed,sizeof(compressed),0,0);
     
     printf("%s\n",hash);
     printf("%s\n", hashcode_compressed);
@@ -136,31 +136,34 @@ void receive_script(clientParam* cp){
         printf("An error has occured while sending the script - compressed.\n");
     }
     else{
-        
-        //decompres
-        //compar hash de pe file decompresat
+        printf("ar trb decompress\n");
+        int dim = 30; // o primesc de la celalalt client, e dimensiunea scriputlui necompressat
+        //unsigned char hash[crypto_hash_sha256_BYTES];
         unsigned char hash[crypto_generichash_BYTES];
         char decompressed[1024];
+        //decompress(dim, decompressed, compressed);
         
-        crypto_generichash(hash, sizeof (hash),
-                   decompressed, sizeof(decompressed),
-                   NULL, 0);
+        //crypto_hash_sha256(hash, decompressed, sizeof(decompressed));
+        crypto_generichash(hash,sizeof(hash),decompressed,sizeof(decompressed),0,0);
 
+        //compar hash de pe file decompresat
         if(strcmp(hash, hashcode_decompressed)!=0){
             printf("An error has occured while sending the script - decompressed.\n");
         }
         else
         {
             printf("The file will be sent to the update agent");
+            //updateAgent.c apleaza o functie(param locatia fisierului) care face update
+            FILE *fp;
+            char file[100]="data.sh";
+            fp  = fopen (file, "w");
+
+            fprintf(fp,"%s", decompressed);
+            fclose(fp);
+
+            update(file);
         }
 
-        
-        //updateAgent.c apleaza o functie(param locatia fisierului) care face update
-        //FILE *fp;
-        //fp  = fopen ("data.sh", "w");
-
-        //fprintf(fp,"%s", script);
-        //fclose(fp);
     }
 
     system("clear");
@@ -168,19 +171,18 @@ void receive_script(clientParam* cp){
 
     return NULL;
 }
-void decompress(char* decompressed, char *compressed){
+void decompress(int x, char* decompressed, char *compressed){
     
     printf("%s\n",compressed);
+    bzero(decompressed,1024);
+    printf("%d\n", x);
 
-    // STEP 2.
-    // inflate b into c
-    // zlib struct
     z_stream infstream;
     infstream.zalloc = Z_NULL;
     infstream.zfree = Z_NULL;
     infstream.opaque = Z_NULL;
     // setup "b" as the input and "c" as the compressed output
-    infstream.avail_in = (uInt)(((char*)(Bytef *)compressed) - compressed); // size of input
+    infstream.avail_in = (uInt)(x); // size of input
     infstream.next_in = (Bytef *)compressed; // input char array
     infstream.avail_out = (uInt)sizeof(decompressed); // size of output
     infstream.next_out = (Bytef *)(decompressed); // output char array
@@ -190,12 +192,10 @@ void decompress(char* decompressed, char *compressed){
     inflate(&infstream, Z_NO_FLUSH);
     inflateEnd(&infstream);
      
-    printf("Uncompressed size is: %lu\n", strlen(decompressed));
+    printf("Uncompressed size is: %d\n", strlen(decompressed));
     printf("Uncompressed string is: %s\n", decompressed);
     
 }
-
-
 
 void test_compressed(){
     
@@ -203,9 +203,9 @@ void test_compressed(){
 
     // placeholder for the compressed (deflated) version of "a" 
     char b[1024];
-
+    char c[1024];
     
-
+    int x = strlen(a);
     printf("Uncompressed size is: %lu\n", strlen(a));
     printf("Uncompressed string is: %s\n", a);
 
@@ -238,16 +238,16 @@ void test_compressed(){
 
     printf("\n----------\n\n");
 
-
+    /*
     // STEP 2.
     // inflate b into c
     // zlib struct
-    /*z_stream infstream;
+    z_stream infstream;
     infstream.zalloc = Z_NULL;
     infstream.zfree = Z_NULL;
     infstream.opaque = Z_NULL;
     // setup "b" as the input and "c" as the compressed output
-    infstream.avail_in = (uInt)((char*)defstream.next_out - b); // size of input
+    infstream.avail_in = (uInt)(x); // size of input
     infstream.next_in = (Bytef *)b; // input char array
     infstream.avail_out = (uInt)sizeof(c); // size of output
     infstream.next_out = (Bytef *)c; // output char array
@@ -258,8 +258,9 @@ void test_compressed(){
     inflateEnd(&infstream);*/
 
     // placeholder for the UNcompressed (inflated) version of "b"
-    char c[1024];
-    decompress(c,b);
+    
+    bzero(c,1024);
+    decompress(x,c,b);
      
     printf("Uncompressed size is: %lu\n", strlen(c));
     printf("Uncompressed string is: %s\n", c);
@@ -268,6 +269,51 @@ void test_compressed(){
     // make sure uncompressed is exactly equal to original.
     if(strcmp(a,c)==0)
         printf("MERGE OK\n");
+
+}
+
+void extract_string_3(char* source, char* a, char* b, char* c){
+
+    //compressed!hashcomp!hashdecomp
+    //char str[80] = "This is - www.tutorialspoint.com - website";
+    const char s[2] = "!";
+    char *token;
+   
+   /* get the first token */
+   token = strtok(source, s);
+   int i = 0;
+   /* walk through other tokens */
+   while( token != NULL ) {
+      printf( " %s\n", token );
+      if(i==0){
+          strcpy(a, token);
+          i++;
+      }
+      else
+      if(i==1){
+          strcpy(b, token);
+          i++;
+      }
+      else
+      if(i==2){
+          strcpy(c, token);
+          i++;
+      }
+    
+      token = strtok(NULL, s);
+   }
+
+}
+
+void test_extract_string(){
+
+    char source[100]="ANNNa!svd!vwr";
+    char p1[100];
+    char p2[100];
+    char p3[100];
+
+    extract_string_3(source, p1,p2,p3);
+    printf("%s %s %s\n",p1, p2, p3);
 
 }
 
@@ -299,11 +345,10 @@ void extract_string_2(){
     }
 }
 
-void test_extract_string(){
+void test_hash(){
 
-    char script[100]= "ANAA";
-
-    char hashcode[100];
+    char script[100]= "ANAAAfvrv";
+    char script2[100]= "ANAAvrvrvrevA";
     //update(script);
 
     unsigned char hash[crypto_hash_sha256_BYTES];
@@ -311,12 +356,10 @@ void test_extract_string(){
 
     crypto_hash_sha256(hash, script, sizeof(script));
 
-    printf("%s %d\n", hash, strlen(hash));
+    printf("%s %d %d\n", hash, strlen(hash),crypto_hash_sha256_BYTES);
 
-
-    crypto_hash_sha256(hash2, script, sizeof(script));
-
-    
+    crypto_hash_sha256(hash2, script2, sizeof(script2));
+ 
     printf("%d\n",strlen(hash));
     printf("%d\n",strlen(hash2));
     

@@ -43,6 +43,7 @@ void* commands(void* arg)
         case 3:
             printf("The connection will be closed!\n");
             g_socket_send(cp->socket, "exit", 100, 0, 0);
+            exit(1);
             break;
         default:
             printf("Command not found!\n");
@@ -108,16 +109,16 @@ int main(int argc,char** argv)
     printf("I am client nr %d\n", clientType);
 
     printf("Script sent to the server...\n");
-    char scriptName[100] = "misc/script.sh";
-    int fd = open(scriptName,O_RDONLY);
-    char originalBuff[1024],compressedBuff[1024], originalHash[256],compressedHash[256];
-    bzero(originalBuff, 1024);
-    if(fd < 0)
-    {
-        printf("Wrong path or script doesn t exist!\n");
-    }
-    else
-        read(fd, originalBuff, 1024);
+    // char scriptName[100] = "misc/script.sh";
+    // int fd = open(scriptName,O_RDONLY);
+    // char originalBuff[1024],compressedBuff[1024], originalHash[256],compressedHash[256];
+    // bzero(originalBuff, 1024);
+    // if(fd < 0)
+    // {
+    //     printf("Wrong path or script doesn t exist!\n");
+    // }
+    // else
+    //     read(fd, originalBuff, 1024);
 
     
 

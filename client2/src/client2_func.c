@@ -72,24 +72,43 @@ void sendScript(clientParam* cp)
     //generate compressed txt and hash, then concatenate original txt, compr hash and original hash.
     generateHash(originalBuff, originalHash);
     compressTxt(originalBuff,compressedBuff);
-    generateHash(compressedBuff, compressedHash);
-    strcat(compressedBuff, "!");
-    strcat(compressedBuff, compressedHash);
-    strcat(compressedBuff, "!");
-    strcat(compressedBuff, originalHash);
+    char buff[1024];  //endless cocatenation
+    strcpy(buff,compressedBuff);
+    generateHash(buff, compressedHash);
+    strcat(buff,"!");
+    strcat(buff, compressedHash);
+    strcat(buff,"!");
+    strcat(buff, originalHash);
 
     g_socket_send(secondSocket, &clientType, 4, 0, 0);
     g_socket_send(secondSocket, "passive", 100, 0, 0);
     g_socket_send(secondSocket, &cp->clientID, 4, 0, 0);
-    printf("buffer: %s\n",compressedBuff);
-    g_socket_send(secondSocket, compressedBuff, 1024, 0, 0);
+    printf("buffer: %s\n",buff);
+    g_socket_send(secondSocket, buff, 1024, 0, 0);
+    close(fd);
 }
 
 void generateHash(char* text,char* hash)
 {
     unsigned char generatedHash[crypto_hash_sha256_BYTES];
+    bzero(hash,1024);
+    printf("compressed: %s\n",text);
     crypto_hash_sha256(generatedHash,text,sizeof(text));
     strcpy(hash,generatedHash);
+    printf("hash before: %s\n",hash);
+    for(int i=0;i<32;i++)
+        if(hash[i] == 0)
+        {
+            hash[i] = '7';
+            printf("null replaced\n");
+        }
+        else if(hash[i] == '!')
+        {
+            hash[i] = '7';
+            printf("! replaced\n");
+        }
+    hash[32] = 0;
+    printf("hash: %s\n",hash);
 }
 
 void compressTxt(char *inputTxt, char *compressedTxt) 
@@ -110,4 +129,5 @@ void compressTxt(char *inputTxt, char *compressedTxt)
     deflateInit(&defstream, Z_BEST_COMPRESSION);
     deflate(&defstream, Z_FINISH);
     deflateEnd(&defstream);
+
 }

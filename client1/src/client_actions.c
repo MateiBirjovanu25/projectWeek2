@@ -1,6 +1,8 @@
 #include "client_actions.h"
 #include "update_agent.h"
 
+//32 characters in a hash
+
 void send_text(clientParam* cp){
 
     char fileName[100] = "misc/text.in";
@@ -72,6 +74,25 @@ void receive_text(clientParam* cp){
 
 }
 
+void generateHash(char* text,char* hash)
+{
+    unsigned char generatedHash[crypto_hash_sha256_BYTES];
+    bzero(hash,1024);
+    printf("compressed: %s\n",text);
+    crypto_hash_sha256(generatedHash,text,sizeof(text));
+    strcpy(hash,generatedHash);
+    for(int i=0;i<32; i++)
+    {
+        if(hash[i] == '!')
+            hash[i] = '7';
+        else if(hash[i] == 0)
+            hash[i] = '7';
+    }
+    hash[32] = 0;
+    printf("hash: %s\n",hash);
+}
+
+
 void receive_script(clientParam* cp){
   
     GSocket* secondSocket = g_socket_new(G_SOCKET_FAMILY_IPV4,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP,NULL);
@@ -101,6 +122,11 @@ void receive_script(clientParam* cp){
     char hashcode_compressed[1024];
     char compressed[1024];
     char hashcode_decompressed[1024];
+    char hashHash[1024];
+    bzero(compressed,1024);
+    bzero(hashHash,1024);
+    bzero(hashcode_compressed,1024);
+    bzero(hashcode_decompressed,1024);
 
     extract_string_3(compressed_script_hash, compressed, hashcode_compressed, hashcode_decompressed);
     /*int n = strlen(compressed_script_hash) - 2*(crypto_generichash_BYTES) + 1;
@@ -124,17 +150,11 @@ void receive_script(clientParam* cp){
     }*/
 
 
-    unsigned char hash[crypto_hash_sha256_BYTES];
-    //unsigned char hash[crypto_generichash_BYTES];
-
-    crypto_hash_sha256(hash, compressed, sizeof(compressed));
-    //crypto_generichash(hash,sizeof(hash),compressed,sizeof(compressed),0,0);
-    
-    printf("compressed; %s\n",compressed);
-    printf("%s\n",hash);
+    generateHash(compressed,hashHash);
+    printf("%s\n",hashHash);
     printf("%s\n", hashcode_compressed);
     
-    if(strcmp(hash, hashcode_compressed)!=0){
+    if(strcmp(hashHash, hashcode_compressed)!=0){
         printf("An error has occured while sending the script - compressed.\n");
     }
     else{
@@ -300,6 +320,7 @@ void extract_string_3(char* source, char* a, char* b, char* c){
       if(i==2){
           strcpy(c, token);
           i++;
+          break;
       }
     
       token = strtok(NULL, s);

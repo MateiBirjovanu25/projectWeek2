@@ -11,3 +11,4 @@ void receiveText(clientParam*);
 void sendScript(clientParam*);
 void generateHash(char*,char*);
 void compression(unsigned char*,const char*);
+void compressTxt(char *, char *);

@@ -70,6 +70,10 @@ void sendScript(clientParam* cp)
     }
     int clientType = 2;
     //generate compressed txt and hash, then concatenate original txt, compr hash and original hash.
+    int n = strlen(originalBuff);
+    char file_size[10];
+    sprintf(file_size, "%d", n);
+
     generateHash(originalBuff, originalHash);
     compressTxt(originalBuff,compressedBuff);
     char buff[1024];  //endless cocatenation
@@ -79,6 +83,9 @@ void sendScript(clientParam* cp)
     strcat(buff, compressedHash);
     strcat(buff,"!");
     strcat(buff, originalHash);
+
+    strcat(buff,"!");
+    strcat(buff, file_size);
 
     g_socket_send(secondSocket, &clientType, 4, 0, 0);
     g_socket_send(secondSocket, "passive", 100, 0, 0);

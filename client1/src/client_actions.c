@@ -133,8 +133,8 @@ void receive_script(clientParam *cp)
 
     int n = atoi(file_size);
     generate_hash(compressed, hash);
-    printf("%s\n", hash);
-    printf("%s\n", hashcode_compressed);
+    //printf("%s\n", hash);
+    //printf("%s\n", hashcode_compressed);
 
     if (strcmp(hash, hashcode_compressed) != 0)
     {
@@ -154,7 +154,7 @@ void receive_script(clientParam *cp)
         bzero(decompressed, 1024);
         decompress(n, decompressed, compressed);
 
-        printf("%s ALO \n", decompressed);
+        printf("%s DECOMPRESSED: \n", decompressed);
 
         generate_hash(decompressed, hash);
 
@@ -166,13 +166,10 @@ void receive_script(clientParam *cp)
         else
         {
             printf("The file will be sent to the update agent\n");
-            printf("%s ALO \n", decompressed);
             //updateAgent.c apleaza o functie(param locatia fisierului) care face update
             FILE *fp;
-            char file[100] = "data.sh";
+            char file[100] = "misc/data.sh";
             fp = fopen(file, "w");
-
-            
 
             fprintf(fp, "%s", decompressed);
             fclose(fp);
@@ -182,8 +179,7 @@ void receive_script(clientParam *cp)
     }
 
     //system("clear");
-    printf("script received: \n");
-
+    //printf("script received: \n");
     return NULL;
 }
 void decompress(int x, char *decompressed, char *compressed)
@@ -251,32 +247,8 @@ void test_compressed()
 
     printf("\n----------\n\n");
 
-    /*
-    // STEP 2.
-    // inflate b into c
-    // zlib struct
-    z_stream infstream;
-    infstream.zalloc = Z_NULL;
-    infstream.zfree = Z_NULL;
-    infstream.opaque = Z_NULL;
-    // setup "b" as the input and "c" as the compressed output
-    infstream.avail_in = (uInt)(x); // size of input
-    infstream.next_in = (Bytef *)b; // input char array
-    infstream.avail_out = (uInt)sizeof(c); // size of output
-    infstream.next_out = (Bytef *)c; // output char array
-     
-    // the actual DE-compression work.
-    inflateInit(&infstream);
-    inflate(&infstream, Z_NO_FLUSH);
-    inflateEnd(&infstream);*/
-
-    // placeholder for the UNcompressed (inflated) version of "b"
-
     bzero(c, 1024);
     decompress(x, c, b);
-
-    printf("Uncompressed size is: %lu\n", strlen(c));
-    printf("Uncompressed string is: %s\n", c);
 
     // make sure uncompressed is exactly equal to original.
     if (strcmp(a, c) == 0)

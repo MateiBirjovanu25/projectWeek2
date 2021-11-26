@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 
     printf("Connected to server\n");
 
-    test_compressed();
+    //test_compressed();
     //test_hash();
     //test_extract_string();
 

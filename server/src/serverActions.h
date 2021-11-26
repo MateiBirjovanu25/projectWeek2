@@ -19,7 +19,7 @@ typedef struct
     int* clientId;
 }watchDogParam;
 
-int checkHash(char*);
+int checkHash(char*,char*);
 void addToDatabase(char* compressedFile);
 int parseText(char*);
 void receiveText(activeClient*,int);

@@ -79,7 +79,7 @@ void* watchDog(void* param)
 
 int main(int argc,char** argv)
 {
-    addToDatabase("caine");
+    //addToDatabase("caine");
     int port = atoi(argv[1]);
     struct sockaddr_in server;
     server.sin_port=htons(port);

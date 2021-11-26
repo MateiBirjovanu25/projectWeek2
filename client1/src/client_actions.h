@@ -6,13 +6,13 @@ typedef struct{
     int clientId;
 }clientParam;
 
+void decompress(int, char*,char *);
 void send_text(clientParam*);
 void receive_text(clientParam*);
 void receive_script(clientParam*);
 int  checkHash(char*);
 void extractStingHash(char*,char*,char*);
 void test_hash();
-void decompress(int, char*,char *);
 void test_compressed();
-void extract_strings(char*, char*, char* , char*, char*);
+//void extract_strings(char*, char*, char* , char*, char*);
 void generate_hash(char *, char *);

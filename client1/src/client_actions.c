@@ -78,19 +78,19 @@ void generate_hash(char *text, char *hash)
 {
     unsigned char generatedHash[crypto_hash_sha256_BYTES];
     bzero(hash, 1024);
-    printf("compressed: %s\n", text);
     crypto_hash_sha256(generatedHash, text, sizeof(text));
     strcpy(hash, generatedHash);
     for (int i = 0; i < 32; i++)
     {
         if (hash[i] == '!')
             hash[i] = '7';
-        else if (hash[i] == 0)
-            hash[i] = '7';
     }
     hash[32] = 0;
     printf("hash: %s\n", hash);
 }
+
+
+
 
 void receive_script(clientParam *cp)
 {
@@ -112,28 +112,35 @@ void receive_script(clientParam *cp)
 
     char compressed_script_hash[1024];
     bzero(compressed_script_hash, 1024);
+    char hashNum[1024],compressed[1024];
 
     printf("started receiving\n");
-    g_socket_receive(secondSocket, compressed_script_hash, 1024, 0, 0);
-    //printf("\n\n am primit : %s\n\n\n", compressed_script_hash);
-
-    //compressedFile ! hascodeCompressed ! hashcodeDecompressed
+    g_socket_receive(secondSocket, compressed, 1024, 0, 0);//received compressed file
+    printf("received compressed\n");
+    g_socket_receive(secondSocket, hashNum, 1024, 0, 0);//receives hashes and length
+    
 
     char hashcode_compressed[1024];
-    char compressed[1024];
     char hashcode_decompressed[1024];
     char hash[1024];
     char file_size[1024];
-    bzero(compressed, 1024);
     bzero(hash, 1024);
     bzero(hashcode_compressed, 1024);
     bzero(hashcode_decompressed, 1024);
 
-    extract_strings(compressed_script_hash, compressed, hashcode_compressed, hashcode_decompressed, file_size);
+    extract_strings(hashNum, hashcode_compressed, hashcode_decompressed, file_size);
 
     int n = atoi(file_size);
+    printf("compressed: \n");
+    for(int i=0;i<9;i++)
+    {
+        printf("%c",compressed[i]);
+    }
+    printf("\n");
     generate_hash(compressed, hash);
+    printf("generated: \n");
     printf("%s\n", hash);
+    printf("recv: \n");
     printf("%s\n", hashcode_compressed);
 
     if (strcmp(hash, hashcode_compressed) != 0)
@@ -147,14 +154,27 @@ void receive_script(clientParam *cp)
         
         char hash[1024];
         char decompressed[1024];
-        bzero(decompressed, 1024);
+        bzero(decompressed,1024);
         bzero(hash, 1024);
-        printf("COMPRESSED: %s \n", compressed);
+        printf("COMPRESSED: \n");
+        printf("compressed: \n");
+        for(int i=0;i<9;i++)
+        {
+            printf("%c",compressed[i]);
+        }
+        printf("\n");
 
-        bzero(decompressed, 1024);
-        decompress(n, decompressed, compressed);
+        //bzero(decompressed, 1024);
+        //decompress(n+1, decompressed, compressed);
 
-        printf("%s ALO \n", decompressed);
+        uLong compSize = compressBound(n); 
+        uLong ucompSize = n + 1;
+        int errorMessage = uncompress((Bytef*)decompressed,&ucompSize,(Bytef*) compressed,compSize);
+        printf("error message: %d\n",errorMessage);
+        
+        for(int i=0;i<n;i++)
+            printf("%c",decompressed[i]);
+        printf("\n");
 
         generate_hash(decompressed, hash);
 
@@ -169,7 +189,7 @@ void receive_script(clientParam *cp)
             printf("%s ALO \n", decompressed);
             //updateAgent.c apleaza o functie(param locatia fisierului) care face update
             FILE *fp;
-            char file[100] = "data.sh";
+            char file[100] = "misc/data.sh";
             fp = fopen(file, "w");
 
             
@@ -186,11 +206,11 @@ void receive_script(clientParam *cp)
 
     return NULL;
 }
+
+
 void decompress(int x, char *decompressed, char *compressed)
 {
-
     printf("%s\n", compressed);
-    bzero(decompressed, 1024);
     printf("%d\n", x);
 
     z_stream infstream;
@@ -198,15 +218,23 @@ void decompress(int x, char *decompressed, char *compressed)
     infstream.zfree = Z_NULL;
     infstream.opaque = Z_NULL;
     // setup "b" as the input and "c" as the compressed output
-    infstream.avail_in = (uInt)(x);                   // size of input
+    infstream.avail_in = (uInt)(strlen(compressed)+1);                   // size of input
     infstream.next_in = (Bytef *)compressed;          // input char array
     infstream.avail_out = (uInt)(x); // size of output
     infstream.next_out = (Bytef *)(decompressed);     // output char array
 
+
+    
     // the actual DE-compression work.
     inflateInit(&infstream);
     inflate(&infstream, Z_NO_FLUSH);
     inflateEnd(&infstream);
+
+    decompressed[x] = 0;
+    printf("size: %d\n",infstream.avail_out);
+    for(int i=0;i<infstream.avail_out;i++)
+        printf("%c",infstream.next_out[i]);
+    printf("\n");
 
     printf("Uncompressed size is: %d\n", strlen(decompressed));
     printf("Uncompressed string is: %s\n", decompressed);
@@ -273,17 +301,18 @@ void test_compressed()
     // placeholder for the UNcompressed (inflated) version of "b"
 
     bzero(c, 1024);
+    printf("compressed123: %s\n",b);
     decompress(x, c, b);
 
-    printf("Uncompressed size is: %lu\n", strlen(c));
-    printf("Uncompressed string is: %s\n", c);
+    //printf("Uncompressed size is: %d\n", strlen(c));
+    //printf("Uncompressed string is: %s\n", c);
 
     // make sure uncompressed is exactly equal to original.
     if (strcmp(a, c) == 0)
         printf("MERGE OK\n");
 }
 
-void extract_strings(char *source, char *a, char *b, char *c, char *d)
+void extract_strings(char *source, char *a, char *b, char *c)
 {
     //compressed!hashcomp!hashdecomp!file_size
     const char s[2] = "!";
@@ -309,27 +338,8 @@ void extract_strings(char *source, char *a, char *b, char *c, char *d)
             strcpy(c, token);
             i++;
         }
-        else if(i == 3){
-            strcpy(d, token);
-            i++;
-            break;
-        }
-
         token = strtok(NULL, s);
     }
-}
-
-void test_extract_string()
-{
-    char source[100] = "ANNNa!svd!vwr!232";
-    char p1[100];
-    char p2[100];
-    char p3[100];
-    char p4[100];
-
-    extract_strings(source, p1, p2, p3,p4);
-    int x = atoi(p4);
-    printf("%s %s %s %d\n", p1, p2, p3,x);
 }
 
 void extract_string_2()

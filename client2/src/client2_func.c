@@ -53,14 +53,15 @@ void sendScript(clientParam* cp)
     printf("Script sent to the server...\n");
     char scriptName[100] = "misc/script.sh";
     int fd = open(scriptName,O_RDONLY);
-    char originalBuff[1024],compressedBuff[1024], originalHash[256],compressedHash[256];
-    bzero(originalBuff, 1024);
+    char originalBuff[1024], originalHash[256],compressedHash[256];
+    char compressedBuff[1024];
     if(fd < 0)
     {
         printf("Wrong path or script doesn t exist!\n");
     }
     else
         read(fd, originalBuff, 1024);
+    close(fd);
 
     GSocket* secondSocket = g_socket_new(G_SOCKET_FAMILY_IPV4, G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_TCP, NULL);
     if(g_socket_connect(secondSocket, cp->addr,0,0) == 0)
@@ -73,43 +74,75 @@ void sendScript(clientParam* cp)
     int n = strlen(originalBuff);
     char file_size[10];
     sprintf(file_size, "%d", n);
+    printf("original buffer: %s\n",originalBuff);
+    
+    char replaceString[1024];
+    strcpy(replaceString,originalBuff);
 
-    generateHash(originalBuff, originalHash);
-    compressTxt(originalBuff,compressedBuff);
+
+    generateHash(replaceString, originalHash);
+
+    uLong ucompoSize = strlen(replaceString) + 1;
+    uLong compSize = compressBound(ucompoSize);
+    
+    printf("original buffer: \n");
+    printf("%s\n",replaceString);
+
+    compress((Bytef*)compressedBuff,&compSize,(Bytef*)replaceString,ucompoSize);
+    printf("size: %d\n",compSize);
     char buff[1024];  //endless cocatenation
-    strcpy(buff,compressedBuff);
-    generateHash(buff, compressedHash);
-    strcat(buff,"!");
-    strcat(buff, compressedHash);
-    strcat(buff,"!");
-    strcat(buff, originalHash);
+    printf("compressed: \n");
+    for(int i=0;i<compSize;i++)
+    {
+        printf("%c",compressedBuff[i]);
+    }
+    printf("\n");
 
-    strcat(buff,"!");
-    strcat(buff, file_size);
+    generateHash(compressedBuff, compressedHash);
+    int index = 0;
+    for(int i=0;i<strlen(compressedHash);i++)
+    {
+        buff[index] = compressedHash[i];
+        index++;
+    }
+    buff[index] = '!';
+    index++;
+    for(int i=0;i<strlen(originalHash);i++)
+    {
+        buff[index] = originalHash[i];
+        index++;
+    }
+    buff[index] = '!';
+    index++;
+    for(int i=0;i<strlen(file_size);i++)
+    {
+        buff[index] = file_size[i];
+        index++;
+    }
+
+    printf("compressed hash\n");
+    printf("%s\n",compressedHash);
+    printf("uncompressed hash\n");
+    printf("%s\n",originalHash);
 
     g_socket_send(secondSocket, &clientType, 4, 0, 0);
     g_socket_send(secondSocket, "passive", 100, 0, 0);
     g_socket_send(secondSocket, &cp->clientID, 4, 0, 0);
-    printf("buffer: %s\n",buff);
+    g_socket_send(secondSocket,compressedBuff,1024,0,0);
     g_socket_send(secondSocket, buff, 1024, 0, 0);
-    close(fd);
+    
 }
 
 void generateHash(char* text,char* hash)
 {
     unsigned char generatedHash[crypto_hash_sha256_BYTES];
     bzero(hash,1024);
-    printf("compressed: %s\n",text);
+    printf("text: %s\n",text);
     crypto_hash_sha256(generatedHash,text,sizeof(text));
     strcpy(hash,generatedHash);
     printf("hash before: %s\n",hash);
     for(int i=0;i<32;i++)
-        if(hash[i] == 0)
-        {
-            hash[i] = '7';
-            printf("null replaced\n");
-        }
-        else if(hash[i] == '!')
+        if(hash[i] == '!')
         {
             hash[i] = '7';
             printf("! replaced\n");

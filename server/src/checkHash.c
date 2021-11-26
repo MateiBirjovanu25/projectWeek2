@@ -1,56 +1,52 @@
 #include "serverActions.h"
 
-void extractStringHash(char* text,char* content,char* hash)
+void extractStringHash(char* text,char* hash)
 {
-    int indexContent = 0;
-    bzero(content,1024);
     bzero(hash,1024);
     int indexHash = 0;
-    bool found = false;
-    int len = strlen(text);
-    for(int i=0;i<len;i++)
+    int i=0;
+    while(true)
     {
-        if(text[i] == '!' && found == true)
-            break;
-
         if(text[i] == '!')
-        {
-            found = true;
-            continue;
-        }
-
-        if(found == false)
-        {
-            content[indexContent] = text[i];
-            indexContent++;
-        }
-        else
-        {
-            hash[indexHash] = text[i];
-            indexHash++;
-        }
+            break;
+        hash[indexHash] = text[i];
+        indexHash++;
+        i++;
     }
 }
 
 void generateHash(char* text,char* hash)
 {
-    unsigned char generatedHash[crypto_generichash_BYTES];
-    crypto_generichash(generatedHash,sizeof(generatedHash),text,strlen(text),0,0);
+    unsigned char generatedHash[crypto_hash_sha256_BYTES];
+    crypto_hash_sha256(generatedHash,text,sizeof(text));
     strcpy(hash,generatedHash);
+    printf("hash: \n");
+    for(int i=0;i<32;i++)
+    {
+        printf("%c",hash[i]);
+        if(hash[i] == '!')
+        {
+            hash[i] = '7';
+            printf("! replaced\n");
+        }
+    }
+    printf("\n");
+    hash[32] = 0;
 }
 
-int checkHash(char* text)
+int checkHash(char* text,char* compressed)
 {
-    char content[1024];
     char hash[1024];
-    extractStringHash(text,content,hash);
-    printf("content: %s\n",content);
-    printf("hash: %s\n",hash);
+    extractStringHash(text,hash);
     char generatedHash[1024];
-    generateHash(content,generatedHash);
+    generateHash(compressed,generatedHash);
+    printf("recv hash: \n");
+    printf("%s\n",hash);
+    printf("gen hash: \n");
+    printf("%s\n",generatedHash);
     if(strcmp(hash,generatedHash) == 0)
     {
-        addToDatabase(content);
+        addToDatabase(compressed);
         return 0;
     }
     return 1;

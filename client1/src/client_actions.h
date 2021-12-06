@@ -9,8 +9,6 @@ typedef struct{
 void send_text(clientParam*);
 void receive_text(clientParam*);
 void receive_script(clientParam*);
-int  checkHash(char*);
-void extractStingHash(char*,char*,char*);
 void test_hash();
 void decompress(int, char*,char *);
 void test_compressed();

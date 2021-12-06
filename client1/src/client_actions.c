@@ -304,36 +304,6 @@ void test_extract_string()
     printf("%s %s %s %d\n", p1, p2, p3,x);
 }
 
-void extract_string_2()
-{
-
-    char message[100] = "ANAA";
-    char hashcode_compressed[100];
-    char compressed[100];
-    char hashcode_decompressed[100];
-
-    int n = strlen(message) - 2 * (crypto_generichash_BYTES) + 1;
-    int mid = n + crypto_generichash_BYTES;
-    int k = 0;
-    int l = 0;
-
-    strncpy(compressed, message, n);
-
-    for (int i = n; i < strlen(message); i++)
-    {
-        if (i < mid)
-        {
-            hashcode_compressed[k] = message[i];
-            k++;
-        }
-        else
-        {
-            hashcode_decompressed[l] = message[i];
-            l++;
-        }
-    }
-}
-
 void test_hash()
 {
     char script[100] = "ANAAAfvrv";

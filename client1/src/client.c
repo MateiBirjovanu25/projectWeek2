@@ -57,7 +57,7 @@ void *command_menu(void *arg)
         int command;
 
         printf("Enter command number:\n");
-        printf("1.receive from clientId (you have to insert it) \n");
+        printf("1.receive from client_id (you have to insert it) \n");
         printf("2.receive script client_id\n");
         printf("3.exit\n");
 
@@ -136,7 +136,7 @@ int main(int argc, char **argv)
 
     printf("Connected to server\n");
 
-    test_compressed();
+    //test_compressed();
     //test_hash();
     //test_extract_string();
 

@@ -16,6 +16,5 @@
 #include <sodium.h>
 #include <zlib.h>
 #include <assert.h>
-#include <network.h>
 #define CLIENT_ID 1
 #define _OPEN_SYS_ITOA_EXT

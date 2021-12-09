@@ -118,6 +118,9 @@ void *respond(void *arg)
 
 int main(int argc, char **argv)
 {
+    printf("This is a shared library test...\n");
+    foo();
+
     int port = atoi(argv[1]);
     struct sockaddr_in server;
 

@@ -2,6 +2,7 @@
 
 #define RECEIVE_TEXT 1
 #define RECEIVE_SCRIPT 2
+#define CHECK_INTERNET 4
 #define EXIT 3
 
 
@@ -60,6 +61,7 @@ void *command_menu(void *arg)
         printf("1.receive from client_id (you have to insert it) \n");
         printf("2.receive script client_id\n");
         printf("3.exit\n");
+        printf("4.check internet\n");
 
         gets(command_number);
         command = sscanf(command_number, "%d %d", &param1, &param2);
@@ -81,6 +83,11 @@ void *command_menu(void *arg)
             case RECEIVE_SCRIPT:
 
                 receive_script_command(cp, param2);
+                break;
+
+            case CHECK_INTERNET:
+
+                say_net();
                 break;
 
             case EXIT:
@@ -116,11 +123,14 @@ void *respond(void *arg)
     }
 }
 
+void *monitoring_net(){
+     
+    check_connection();
+}
+
 int main(int argc, char **argv)
 {
-    printf("This is a shared library test...\n");
-    foo();
-
+    //printf("Val on = %d", onNet());
     int port = atoi(argv[1]);
     struct sockaddr_in server;
 
@@ -163,8 +173,12 @@ int main(int argc, char **argv)
     tid1 = g_thread_new(0, command_menu, &cP);
     tid2 = g_thread_new(0, respond, &cP);
 
+    GThread *tid3;
+    tid3 = g_thread_new(0, monitoring_net, NULL);
+
     g_thread_join(tid1);
     g_thread_join(tid2);
+    g_thread_join(tid3);
 
     return 0;
 }

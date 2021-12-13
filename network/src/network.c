@@ -4,6 +4,8 @@
 #define MYPROTO NETLINK_ROUTE
 #define MYMGRP RTMGRP_IPV4_ROUTE
 
+
+
 void foo(){
     printf("Hello this is from network library\n");
 }
@@ -123,41 +125,71 @@ static int msg_handler(struct sockaddr_nl *nl, struct nlmsghdr *msg)
         case RTM_NEWADDR:
             if_indextoname(ifi->ifi_index,ifname);
             printf("msg_handler: RTM_NEWADDR - connected: %s\n",ifname);
+            //on = 1;
+            return 0;
             break;
         case RTM_DELADDR:
             if_indextoname(ifi->ifi_index,ifname);
             printf("msg_handler: RTM_DELADDR - disconnected : %s\n",ifname);
+            //on = 0;
+            return 0;
             break;
         case RTM_NEWLINK:
             if_indextoname(ifa->ifa_index,ifname);
             printf("msg_handler: RTM_NEWLINK\n");
             netlink_link_state(nl, msg);
+            return 0;
             break;
         case RTM_DELLINK:
             if_indextoname(ifa->ifa_index,ifname);
             printf("msg_handler: RTM_DELLINK : %s\n",ifname);
+            return 0;
             break;
         default:
             printf("msg_handler: Unknown netlink nlmsg_type %d\n",
                     msg->nlmsg_type);
+            return 0;
             break;
     }
     return 0;
 }
-int check_connection(){
+
+void say_net()
+{
+    system("nload");
+} 
+/*
+void monitoring(int seconds)
+{
+    struct event ev;
+    struct timeval tv;
+
+    tv.tv_sec = seconds;
+    tv.tv_usec = 0;
+
+    event_init();
+    evtimer_set(&ev, say_net, NULL);
+    evtimer_add(&ev, &tv);
+    event_dispatch();
+}
+*/
+
+void check_connection(){
+
     int nls = open_netlink();
-    printf("Started watching:\n");
+    //printf("Started watching:\n");
     if (nls<0) {
         printf("Open Error!");
     }
     while (1)
         read_event(nls, msg_handler);
-    return 0;
 }
 
 int main(int argc, char *argv[])
 {
     int nls = open_netlink();
+    //monitoring(4);
+    //say_net();
     printf("Started watching:\n");
     if (nls<0) {
         printf("Open Error!");

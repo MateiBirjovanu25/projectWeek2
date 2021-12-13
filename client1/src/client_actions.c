@@ -43,6 +43,7 @@ void send_text(clientParam *cp)
     printf("1.receive from clientId (you have to insert it) \n");
     printf("2.receive script client_id\n");
     printf("3.exit\n");
+    printf("4.check internet\n");
 
     //g_socket_close(secondSocket,0);
 }

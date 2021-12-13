@@ -9,11 +9,19 @@
 
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
+#include <sys/time.h>
+#include <event.h>
+#include <sys/wait.h>
+#include <sys/stat.h>
+#include <stdlib.h>
 
-extern int check_connection();
+extern void check_connection();
+extern int onNet();
+
 //#ifndef foo_h__
 //#define foo_h__
  
 extern void foo();
+extern void say_net();
  
 //#endif  // network_h__

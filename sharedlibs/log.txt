@@ -1,0 +1,10 @@
+print_logs2: 01:34:04 [ERROR] Logger in a file mode!
+print_logs2: 11:38:43 [ERROR] Logger in a file mode!
+print_logs2: 11:39:45 [ERROR] Logger in a file mode!
+print_logs2: 11:40:22 [ERROR] Logger in a file mode!
+print_logs2: 11:40:41 [ERROR] Logger in a file mode!
+print_logs2: 11:40:41 [ERROR] Error1
+print_logs2: 11:42:51 [ERROR] Error
+print_logs2: 11:42:51 [WARNING] warning
+print_logs2: 11:42:51 [STATUS] Status
+print_logs3: 12:26:46 [ERROR] Logger in a file mode!

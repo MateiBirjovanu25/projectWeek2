@@ -83,20 +83,30 @@ int main(int argc,char** argv)
     GSocket* socket = g_socket_new(G_SOCKET_FAMILY_IPV4,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP, NULL);
     GSocketAddress* address = g_socket_address_new_from_native(&serveraddr,sizeof(serveraddr));
 
+    //Initializing the logger   
+    //=============================================
+
+    logger_reset_state();
+    logger_set_log_file("../LOGGER/LOGGER.txt");
+    log_status("Client2 is working!");
+
+    //=============================================
+
     if(socket == 0){
-        printf("Error creating the socket!\n");
+        log_error("Error creating the socket!\n");
+
         exit(1);
     }
     else
-        printf("Socket created successfully!\n");
+        log_status("Socket created successfully!\n");
 
     if(g_socket_connect(socket,address, 0, 0) == 0)
     {
-        printf("Connecting error! \n");
+        log_error("Connecting error! \n");
         exit(1);
     }
     else
-        printf("Connected to server!\n");
+        log_status("Connected to server!\n");
 
     int client = 2;
     char clientType;
@@ -104,21 +114,19 @@ int main(int argc,char** argv)
     g_socket_send(socket, "active", 100, 0, 0);
 
     g_socket_receive(socket, (gchar*)&clientType, sizeof(int), 0,0);
-    printf("I am client nr %d\n", clientType);
+    log_status("I am client nr %d\n", clientType);
 
-    printf("Script sent to the server...\n");
+    log_status("Script sent to the server...\n");
     char scriptName[100] = "misc/script.sh";
     int fd = open(scriptName,O_RDONLY);
     char originalBuff[1024],compressedBuff[1024], originalHash[256],compressedHash[256];
     bzero(originalBuff, 1024);
     if(fd < 0)
     {
-        printf("Wrong path or script doesn t exist!\n");
+        log_error("Wrong path or script doesn t exist!\n");
     }
     else
         read(fd, originalBuff, 1024);
-
-    
 
 
     g_mutex_init(&mutex);

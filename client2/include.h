@@ -13,3 +13,10 @@
 #include <mysql.h>
 #include <sodium.h>
 #include <zlib.h>
+#include <syslog.h>
+#include <stdio.h>
+#include <errno.h>
+#include <time.h>
+#include <stdarg.h>
+#include <string.h>
+//#include <print_logs.h>

@@ -1,0 +1,40 @@
+serverBuild: 13:43:57 [STATUS] Server is working!
+client2: 13:44:19 [STATUS] Client2 is working!
+client2: 13:44:19 [STATUS] Socket created successfully!
+
+serverBuild: 13:44:19 [STATUS] cient connected
+
+client2: 13:44:19 [STATUS] Connected to server!
+
+serverBuild: 13:44:19 [STATUS] client 2
+
+serverBuild: 13:44:19 [STATUS] socket in main: 447431296
+
+client2: 13:44:19 [STATUS] I am client nr 1
+
+client2: 13:44:19 [STATUS] Script sent to the server...
+
+serverBuild: 13:44:19 [STATUS] socket in thread: 447431296
+
+client2: 13:48:34 [STATUS] Client2 is working!
+client2: 13:48:34 [STATUS] Socket created successfully!
+
+serverBuild: 13:48:34 [STATUS] cient connected
+
+client2: 13:48:34 [STATUS] Connected to server!
+
+serverBuild: 13:48:34 [STATUS] client 2
+
+serverBuild: 13:48:34 [STATUS] socket in main: 447431632
+
+client2: 13:48:34 [STATUS] I am client nr 2
+
+client2: 13:48:34 [STATUS] Script sent to the server...
+
+serverBuild: 13:48:34 [STATUS] socket in thread: 447431632
+
+client2: 13:49:22 [STATUS] Client2 is working!
+client2: 13:49:22 [STATUS] Socket created successfully!
+
+client2: 13:49:22 [ERROR] Connecting error! 
+

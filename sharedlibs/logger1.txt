@@ -1,0 +1,7 @@
+print_logs3: 12:28:51 [ERROR] Logger in a file mode!
+print_logs3: 12:38:29 [ERROR] Logger in a file mode!
+print_logs3: 13:04:51 [ERROR] Logger in a file mode!
+print_logs3: 13:08:48 [ERROR] Logger in a file mode!
+print_logs3: 13:10:06 [ERROR] Logger in a file mode!
+print_logs3: 13:11:33 [ERROR] Logger in a file mode!
+print_logs3: 13:11:33 [STATUS] Status!

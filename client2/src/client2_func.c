@@ -2,14 +2,14 @@
 
 void sendText(clientParam* cp)
 {
-    printf("File sent to the server...\n");
+    log_status("File sent to the server...\n");
     char fileName[100] = "misc/mesaj";
     int fd = open(fileName,O_RDONLY);
     char buffer[1024];
     bzero(buffer, 1024);
     if(fd < 0)
     {
-        printf("Wrong path or file doesn t exist!\n");
+        log_error("Wrong path or file doesn t exist!\n");
     }
     else
         read(fd,buffer,1024);
@@ -17,7 +17,7 @@ void sendText(clientParam* cp)
     GSocket* secondSocket = g_socket_new(G_SOCKET_FAMILY_IPV4,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP, NULL);
     if(g_socket_connect(secondSocket, cp->addr,0,0) == 0)
     {
-        printf("Connecting error..\n");
+        log_error("Connecting error..\n");
         exit(1);
     }
     int clientType = 2;
@@ -26,6 +26,7 @@ void sendText(clientParam* cp)
     g_socket_send(secondSocket, "passive", 100,0,0);
     g_socket_send(secondSocket, &cp->clientID,4,0,0);
     g_socket_send(secondSocket, buffer,1024,0,0);
+
 }
 
 void receiveText(clientParam* cp)
@@ -33,7 +34,7 @@ void receiveText(clientParam* cp)
     GSocket* secondSocket = g_socket_new(G_SOCKET_FAMILY_IPV4,G_SOCKET_TYPE_STREAM,G_SOCKET_PROTOCOL_TCP,NULL);
     if(g_socket_connect(secondSocket, cp->addr,0,0) == 0)
     {
-        printf("Connecting error..\n");
+        log_error("Connecting error..\n");
         exit(1);
     }
     int clientType = 2;
@@ -44,20 +45,20 @@ void receiveText(clientParam* cp)
     char buffer[1024];
     bzero(buffer, 1024);
     g_socket_receive(secondSocket, buffer, 1024, 0, 0);
-    printf("Text received: \n");
-    printf("%s\n", buffer); 
+    log_debug("Text received: \n");
+    log_status("%s\n", buffer); 
 }
 
 void sendScript(clientParam* cp)
 {
-    printf("Script sent to the server...\n");
+    log_status("Script sent to the server...\n");
     char scriptName[100] = "misc/script.sh";
     int fd = open(scriptName,O_RDONLY);
     char originalBuff[1024],compressedBuff[1024], originalHash[256],compressedHash[256];
     bzero(originalBuff, 1024);
     if(fd < 0)
     {
-        printf("Wrong path or script doesn t exist!\n");
+        log_error("Wrong path or script doesn t exist!\n");
     }
     else
         read(fd, originalBuff, 1024);
@@ -65,7 +66,7 @@ void sendScript(clientParam* cp)
     GSocket* secondSocket = g_socket_new(G_SOCKET_FAMILY_IPV4, G_SOCKET_TYPE_STREAM, G_SOCKET_PROTOCOL_TCP, NULL);
     if(g_socket_connect(secondSocket, cp->addr,0,0) == 0)
     {
-        printf("Connecting error..\n");
+        log_error("Connecting error..\n");
         exit(1);
     }
     int clientType = 2;

@@ -1,0 +1,42 @@
+client2: 13:23:21 [STATUS] Client2 is working!
+client2: 13:23:21 [STATUS] Socket created successfully!
+
+client2: 13:23:21 [ERROR] Connecting error! 
+
+client2: 13:30:49 [STATUS] Client2 is working!
+client2: 13:30:49 [STATUS] Socket created successfully!
+
+client2: 13:30:49 [ERROR] Connecting error! 
+
+client2: 13:31:03 [STATUS] Client2 is working!
+client2: 13:31:03 [STATUS] Socket created successfully!
+
+client2: 13:31:03 [ERROR] Connecting error! 
+
+client2: 13:31:48 [STATUS] Client2 is working!
+client2: 13:31:48 [STATUS] Socket created successfully!
+
+client2: 13:31:48 [STATUS] Connected to server!
+
+client2: 13:31:48 [STATUS] I am client nr 1
+
+client2: 13:31:48 [STATUS] Script sent to the server...
+
+client2: 13:32:21 [STATUS] Client2 is working!
+client2: 13:32:21 [STATUS] Socket created successfully!
+
+client2: 13:32:21 [STATUS] Connected to server!
+
+client2: 13:32:21 [STATUS] I am client nr 2
+
+client2: 13:32:21 [STATUS] Script sent to the server...
+
+client2: 13:38:41 [STATUS] Client2 is working!
+client2: 13:38:41 [STATUS] Socket created successfully!
+
+client2: 13:38:41 [STATUS] Connected to server!
+
+client2: 13:38:41 [STATUS] I am client nr 1
+
+client2: 13:38:41 [STATUS] Script sent to the server...
+
